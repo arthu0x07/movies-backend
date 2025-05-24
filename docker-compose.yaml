@@ -1,0 +1,29 @@
+version: '2.24.6'
+
+services:
+  node-backend-container:
+    restart: always
+    container_name: node-backend-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    env_file:
+      - .env.docker
+
+  postgres:
+    container_name: postgres-container
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGDATA: /database/postgres
+
+    volumes:
+      - ./database/pg:/data/postgres
