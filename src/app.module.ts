@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { envSchema } from './env'
 import { PrismaModule } from '@/database/prisma/prisma.module'
-import { HelloModule } from './modules/hello/hello.module'
 import { UploadModule } from './modules/upload/upload.module'
 
 @Module({
@@ -12,7 +11,6 @@ import { UploadModule } from './modules/upload/upload.module'
       isGlobal: true,
     }),
     PrismaModule,
-    HelloModule,
     UploadModule,
   ],
 })
