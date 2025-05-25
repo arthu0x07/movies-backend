@@ -1,18 +1,15 @@
 import { Body, ConflictException, Controller, Post } from '@nestjs/common'
-import { ZodValidationPipe } from '@/pipes/zod-validation-pipes'
-import { createAccBodySchema, CreateAccBodySchema } from './create-acc.schema'
+import { CreateAccountBodyDto } from './dto/create-acc-body.dto'
 import { UserService } from './user.service'
-
-const createAccValidationPipe = new ZodValidationPipe(createAccBodySchema)
 
 @Controller('/users')
 export class UserController {
-  constructor(private readonly createAccService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post()
-  async handle(@Body(createAccValidationPipe) body: CreateAccBodySchema) {
+  async CreateAccount(@Body() body: CreateAccountBodyDto) {
     try {
-      await this.createAccService.createAccount(body)
+      await this.userService.createAccount(body)
     } catch (error) {
       if (error instanceof ConflictException) {
         throw error

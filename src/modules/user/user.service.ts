@@ -1,13 +1,13 @@
 import { ConflictException, Injectable } from '@nestjs/common'
 import { hash } from 'bcryptjs'
-import { CreateAccBodySchema } from './create-acc.schema'
 import { PrismaService } from '@/database/prisma/prisma.service'
+import { CreateAccountBodyDto } from './dto/create-acc-body.dto'
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createAccount(body: CreateAccBodySchema): Promise<void> {
+  async createAccount(body: CreateAccountBodyDto): Promise<void> {
     const { name, email, password } = body
 
     const userEmailExists = await this.prisma.user.findUnique({
