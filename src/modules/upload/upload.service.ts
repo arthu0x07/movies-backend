@@ -6,7 +6,6 @@ import { randomUUID } from 'crypto'
 import { InvalidFileTypeError } from './errors/invalid-attachment-type.error'
 import { UploadFileRequest, UploadedFile } from './upload.interface'
 
-
 @Injectable()
 export class FileUploadService {
   private client: S3Client
@@ -71,12 +70,17 @@ export class FileUploadService {
     title: string
     url: string
   }): Promise<UploadedFile> {
-    // insert on database and return
+    const file = await this.prisma.file.create({
+      data: {
+        title,
+        url,
+      },
+    })
 
     return {
-      id: '',
-      title: '',
-      url: '',
+      id: file.id,
+      title: file.title,
+      url: file.url,
     }
   }
 }
