@@ -1,12 +1,12 @@
+import { Language, MovieStatus } from '@prisma/client'
 import {
-  IsOptional,
-  IsEnum,
-  IsString,
-  IsDateString,
   IsArray,
+  IsDateString,
+  IsEnum,
+  IsOptional,
+  IsString,
   IsUUID,
 } from 'class-validator'
-import { MovieStatus, Language } from '@prisma/client'
 
 export class GetMoviesQueryDto {
   @IsOptional()

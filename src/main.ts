@@ -1,11 +1,11 @@
+import { ValidationPipe } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import { ConfigService } from '@nestjs/config'
-import { ValidationPipe } from '@nestjs/common'
 
-import { Env } from './env'
-import { PrismaService } from './database/prisma/prisma.service'
 import { seedMovies } from 'prisma/seed/movies.seed'
+import { PrismaService } from './database/prisma/prisma.service'
+import { Env } from './env'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)

@@ -1,14 +1,14 @@
+import { PrismaService } from '@/database/prisma/prisma.service'
 import {
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import { PrismaService } from '@/database/prisma/prisma.service'
 
-import { CreateMovieBodyDto } from './dto/create-movie.body.dto'
 import { slugify } from '@/utils/slugify.util'
-import { UpdateMovieBodyDto } from './dto/update-movie.body.dto'
+import { CreateMovieBodyDto } from './dto/create-movie.body.dto'
 import { GetMoviesQueryDto } from './dto/get-movies-query.dto'
+import { UpdateMovieBodyDto } from './dto/update-movie.body.dto'
 
 @Injectable()
 export class MoviesService {
@@ -111,7 +111,9 @@ export class MoviesService {
   }
 
   async updateMovie(movieId: string, body: UpdateMovieBodyDto) {
-    const movie = await this.prisma.movie.findUnique({ where: { id: movieId } })
+    const movie = await this.prisma.movie.findUnique({
+      where: { id: movieId },
+    })
 
     if (!movie) {
       throw new NotFoundException('Movie not found.')
@@ -126,7 +128,9 @@ export class MoviesService {
   }
 
   async deleteMovie(movieId: string) {
-    const movie = await this.prisma.movie.findUnique({ where: { id: movieId } })
+    const movie = await this.prisma.movie.findUnique({
+      where: { id: movieId },
+    })
 
     if (!movie) {
       throw new NotFoundException('Movie not found.')
@@ -136,7 +140,9 @@ export class MoviesService {
   }
 
   async addGenresToMovie(movieId: string, genreIds: string[]) {
-    const movie = await this.prisma.movie.findUnique({ where: { id: movieId } })
+    const movie = await this.prisma.movie.findUnique({
+      where: { id: movieId },
+    })
 
     if (!movie) {
       throw new NotFoundException('Movie not found.')
@@ -156,7 +162,9 @@ export class MoviesService {
   }
 
   async removeGenreFromMovie(movieId: string, genreId: string) {
-    const movie = await this.prisma.movie.findUnique({ where: { id: movieId } })
+    const movie = await this.prisma.movie.findUnique({
+      where: { id: movieId },
+    })
 
     if (!movie) {
       throw new NotFoundException('Movie not found.')

@@ -3,21 +3,23 @@
 API para projeto técnico da Cubos Academy <br /><br />
 
 ### Tecnologias Configuradas:
-  - Framework: Nest.js
-  - ORM: Prisma
-  - Linguagem: TypeScript
-  - Banco de Dados: PostgreSQL
-  - Containerização: Docker
-  - Testes Automatizados: Vitest
-  - Zod para validação de variáveis ambientes
-  - ConfigModule do Nest para consumo de variáveis ambientes
-  - Swagger para documentação de API
-  - Envio de E-mails
-  - Upload de imagens
+
+- Framework: Nest.js
+- ORM: Prisma
+- Linguagem: TypeScript
+- Banco de Dados: PostgreSQL
+- Containerização: Docker
+- Testes Automatizados: Vitest
+- Zod para validação de variáveis ambientes
+- ConfigModule do Nest para consumo de variáveis ambientes
+- Swagger para documentação de API
+- Envio de E-mails
+- Upload de imagens
 
 <br /><br />
 
 ## Descrição
+
 - (Preencher)
 
 <br /><br />
@@ -26,10 +28,9 @@ API para projeto técnico da Cubos Academy <br /><br />
 
 Para rodar esse projeto, você vai precisar adicionar as seguintes variáveis de ambiente nos seus .env's
 
-`DATABASE_URL` - *URL utilizada para se conectar com o banco de dados. (termina com @postgres:5432)*
+`DATABASE_URL` - _URL utilizada para se conectar com o banco de dados. (termina com @postgres:5432)_
 
-`PORT` - *Porta específica para rodar a aplicação, caso não passe nenhuma, a 3333 será o padrão.* 
-
+`PORT` - _Porta específica para rodar a aplicação, caso não passe nenhuma, a 3333 será o padrão._
 
 <br /><br />
 
@@ -41,7 +42,7 @@ Para rodar a aplicação com Docker, crie um arquivo .env.docker semelhante ao e
 
 ## Observação das variáveis de Ambiente padrões
 
-Ao rodar a aplicação com o docker utilizando o IP do container, causa um conflito com a utilização do prisma para executar e criar migrações, como o prisma utiliza a mesma variável ambiente chamada "DATABASE_URL", ele não consegue se comunicar diretamente com o IP postgres:5432. 
+Ao rodar a aplicação com o docker utilizando o IP do container, causa um conflito com a utilização do prisma para executar e criar migrações, como o prisma utiliza a mesma variável ambiente chamada "DATABASE_URL", ele não consegue se comunicar diretamente com o IP postgres:5432.
 
 Para contornar isso, devemos fazer o prisma utilizar o IP da nossa maquina HOST, já que o container do postgres está expondo sua porta para a máquina HOST, e para termos esse comportamento, devemos ter um novo arquivo chamado .env, que será utilizado pela nossa máquina HOST para poder executar migrações e fazer o prisma se conectar corretamente com o banco de dados rodando dentro do container.
 
@@ -57,24 +58,25 @@ Para solucionar esse problema, configuramos o Prisma para usar o IP da máquina 
 
 Desta forma, conseguimos executar a aplicação com docker-compose e ainda podemos utilizar do prisma sem problemas para criar e executar migrações :D
 
-
 <br /><br />
 
 ## Instalação
 
-#### Versões recomendadas: 
+#### Versões recomendadas:
+
 - Node: 20.12.1
 - Docker: 26.1.1
 - Docker-Compose: 2.24.6
- 
+
 <br /><br />
 
-#### Passo a Passo: *(Com docker)*
+#### Passo a Passo: _(Com docker)_
+
 ```bash
   git clone https://github.com/arthu0x07/movies-backend.git
 
   npm install
-  
+
   docker-compose build --no-cache
   docker-compose up
 
@@ -83,7 +85,7 @@ Desta forma, conseguimos executar a aplicação com docker-compose e ainda podem
 
 <br />
 
-#### Passo a Passo: *(Desenvolvimento)*
+#### Passo a Passo: _(Desenvolvimento)_
 
 ```bash
   git clone https://github.com/arthu0x07/movies-backend.git
@@ -94,6 +96,7 @@ Desta forma, conseguimos executar a aplicação com docker-compose e ainda podem
 
   npm run start:dev
 ```
+
 <br /><br />
 
 ## Rodando os testes

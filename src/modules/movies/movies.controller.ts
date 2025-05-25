@@ -1,20 +1,20 @@
 import {
   Body,
   Controller,
-  Post,
+  Delete,
   Get,
   Param,
   Patch,
-  Delete,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
 import { AddGenreBodyDto } from './dto/add-genre-body.dto'
 import { CreateMovieBodyDto } from './dto/create-movie.body.dto'
+import { GetMoviesQueryDto } from './dto/get-movies-query.dto'
 import { UpdateMovieBodyDto } from './dto/update-movie.body.dto'
 import { MoviesService } from './movies.service'
-import { GetMoviesQueryDto } from './dto/get-movies-query.dto'
-import { AuthGuard } from '@nestjs/passport'
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('/movies')

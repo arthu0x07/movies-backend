@@ -1,5 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator'
 import { ValidationMessages } from '@/errors/validation-messages'
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator'
 
 export class CreateAccountBodyDto {
   @IsNotEmpty({ message: ValidationMessages.NAME_REQUIRED })

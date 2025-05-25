@@ -1,15 +1,15 @@
+import { CurrentUser } from '@/auth/current-user-decorator'
+import { UserPayload } from '@/auth/jwt-strategy'
 import {
   Controller,
-  UseGuards,
-  Post,
   Delete,
-  Param,
   HttpCode,
+  Param,
+  Post,
+  UseGuards,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { MovieNotificationService } from './movie-notification.service'
-import { CurrentUser } from '@/auth/current-user-decorator'
-import { UserPayload } from '@/auth/jwt-strategy'
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('/notifications/movies')

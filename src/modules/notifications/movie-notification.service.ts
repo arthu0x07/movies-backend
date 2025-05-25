@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common'
 import { PrismaService } from '@/database/prisma/prisma.service'
-import { EmailService } from '../email/email.service'
+import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import { EmailService } from '../email/email.service'
 
 @Injectable()
 export class MovieNotificationService {

@@ -3,8 +3,8 @@ import { PrismaService } from '@/database/prisma/prisma.service'
 import { INestApplication } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Test } from '@nestjs/testing'
-import { randomUUID } from 'node:crypto'
 import bcrypt from 'bcrypt'
+import { randomUUID } from 'node:crypto'
 import request from 'supertest'
 
 describe('File upload (E2E)', () => {

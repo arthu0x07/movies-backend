@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common'
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { PrismaService } from '@/database/prisma/prisma.service'
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { randomUUID } from 'crypto'
 import { InvalidFileTypeError } from './errors/invalid-attachment-type.error'

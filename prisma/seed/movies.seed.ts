@@ -1,4 +1,4 @@
-import { PrismaClient, MovieStatus, Language } from '@prisma/client'
+import { Language, MovieStatus, PrismaClient } from '@prisma/client'
 
 export async function seedMovies(prisma: PrismaClient) {
   const user = await prisma.user.upsert({

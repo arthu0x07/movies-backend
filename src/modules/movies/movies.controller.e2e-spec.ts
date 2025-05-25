@@ -1,13 +1,13 @@
 import { AppModule } from '@/app.module'
 import { PrismaService } from '@/database/prisma/prisma.service'
+import { slugify } from '@/utils/slugify.util'
 import { INestApplication } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Test } from '@nestjs/testing'
-import { randomUUID } from 'node:crypto'
+import { Language, MovieStatus } from '@prisma/client'
 import bcrypt from 'bcrypt'
+import { randomUUID } from 'node:crypto'
 import request from 'supertest'
-import { MovieStatus, Language } from '@prisma/client'
-import { slugify } from '@/utils/slugify.util'
 
 describe('MoviesController (E2E)', () => {
   let app: INestApplication
@@ -193,7 +193,9 @@ describe('MoviesController (E2E)', () => {
       description: updatedData.description,
     })
 
-    const movieInDb = await prisma.movie.findUnique({ where: { id: movie.id } })
+    const movieInDb = await prisma.movie.findUnique({
+      where: { id: movie.id },
+    })
     expect(movieInDb).not.toBeNull()
     expect(movieInDb!.title).toBe(updatedData.title)
   })
@@ -221,7 +223,9 @@ describe('MoviesController (E2E)', () => {
     expect(response.statusCode).toBe(200)
     expect(response.body).toMatchObject({ id: movie.id })
 
-    const movieInDb = await prisma.movie.findUnique({ where: { id: movie.id } })
+    const movieInDb = await prisma.movie.findUnique({
+      where: { id: movie.id },
+    })
     expect(movieInDb).toBeNull()
   })
 
