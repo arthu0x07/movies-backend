@@ -1,27 +1,29 @@
-import { PipeTransform, Injectable } from '@nestjs/common'
-import { InvalidFileTypeError } from '../errors/invalid-file-type.error'
-import { FileTooLargeError } from '../errors/file-too-large.error'
-import { FileNotFoundError } from '../errors/file-not-found.error'
+import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common'
+import { ValidationMessages } from '@/errors/validation-messages'
+
+const MAX_SIZE_IN_BYTES = 15 * 1024 * 1024 // 5MB
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+]
 
 @Injectable()
-export class ParseFilePipe
+export class ParseImageFilePipe
   implements PipeTransform<Express.Multer.File, Express.Multer.File>
 {
-  private readonly allowedMimeTypes = ['image/jpeg', 'image/png']
-  private readonly maxFileSize = 5 * 1024 * 1024 // 5MB
-  private readonly maxFileSizeMB = 5
-
   transform(file: Express.Multer.File): Express.Multer.File {
     if (!file) {
-      throw new FileNotFoundError()
+      throw new BadRequestException(ValidationMessages.FILE_REQUIRED)
     }
 
-    if (!this.allowedMimeTypes.includes(file.mimetype)) {
-      throw new InvalidFileTypeError(file.mimetype)
+    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      throw new BadRequestException(ValidationMessages.INVALID_FILE_TYPE)
     }
 
-    if (file.size > this.maxFileSize) {
-      throw new FileTooLargeError(this.maxFileSizeMB)
+    if (file.size > MAX_SIZE_IN_BYTES) {
+      throw new BadRequestException(ValidationMessages.FILE_TOO_LARGE)
     }
 
     return file

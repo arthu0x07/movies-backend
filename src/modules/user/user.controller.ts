@@ -1,5 +1,5 @@
 import { Body, ConflictException, Controller, Post } from '@nestjs/common'
-import { CreateAccountBodyDto } from './dto/create-acc-body.dto'
+import { CreateAccountBodyDto } from './dto/create-account-body.dto'
 import { UserService } from './user.service'
 
 @Controller('/users')
