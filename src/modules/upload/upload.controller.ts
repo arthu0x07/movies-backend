@@ -5,11 +5,14 @@ import {
   UploadedFile,
   UseInterceptors,
   ParseFilePipe,
+  UseGuards,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { UploadedFile as UploadedFileResponse } from './upload.interface'
 import { FileUploadService } from './upload.service'
+import { AuthGuard } from '@nestjs/passport'
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('/upload')
 export class FileUploadController {
   constructor(private readonly fileUploadService: FileUploadService) {}
