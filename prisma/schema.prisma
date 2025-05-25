@@ -11,3 +11,79 @@ model ExampleModel {
   id   String @id @default(uuid())
   name String
 }
+
+enum MovieStatus {
+  RELEASED
+  IN_PRODUCTION
+  PLANNED
+  CANCELLED
+}
+
+enum Language {
+  EN
+  PT
+  ES
+  FR
+  DE
+  JP
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  movies    Movie[]
+
+  @@map("users")
+}
+
+model Movie {
+  id               String      @id @default(uuid())
+  title            String
+  slug             String      @unique
+  originalTitle    String
+  description      String
+  tagline          String?
+  releaseDate      DateTime    @map("release_date")
+  duration         Int
+  status           MovieStatus
+  language         Language
+  budget           Float?
+  revenue          Float?
+  popularity       Float?
+  votes            Int?
+  ratingPercentage Float?
+
+  fileId String? @unique
+  file   File?   @relation(fields: [fileId], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id])
+
+  genres Genre[] @relation("MovieGenres")
+
+  @@map("movies")
+}
+
+model Genre {
+  id     String  @id @default(uuid())
+  name   String  @unique
+  movies Movie[] @relation("MovieGenres")
+
+  @@map("genres")
+}
+
+model File {
+  id    String @id @default(uuid())
+  title String
+  url   String
+
+  Movie Movie?
+
+  @@map("files")
+}
