@@ -14,7 +14,7 @@ const authenticateBodyValidationPipe = new ZodValidationPipe(
   authenticateBodySchema,
 )
 
-@Controller('/sessions')
+@Controller('/auth')
 export class AuthenticateController {
   constructor(private readonly authService: AuthenticateService) {}
 

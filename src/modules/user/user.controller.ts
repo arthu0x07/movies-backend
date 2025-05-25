@@ -5,7 +5,7 @@ import { UserService } from './user.service'
 
 const createAccValidationPipe = new ZodValidationPipe(createAccBodySchema)
 
-@Controller('/accounts')
+@Controller('/users')
 export class UserController {
   constructor(private readonly createAccService: UserService) {}
 
