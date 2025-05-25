@@ -3,6 +3,10 @@ import { z } from 'zod'
 export const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   PORT: z.coerce.number().optional().default(3333),
+  CLOUDFLARE_ACC_ID: z.string(),
+  CLOUDFLARE_BUCKET_NAME: z.string(),
+  CLOUDFLARE_ACCESS_KEY_ID: z.string(),
+  CLOUDFLARE_SECRET_ACCESS_KEY: z.string(),
 })
 
 export type Env = z.infer<typeof envSchema>
