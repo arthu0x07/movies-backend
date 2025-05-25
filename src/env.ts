@@ -9,6 +9,7 @@ export const envSchema = z.object({
   CLOUDFLARE_SECRET_ACCESS_KEY: z.string(),
   JWT_PRIVATE_KEY: z.string(),
   JWT_PUBLIC_KEY: z.string(),
+  RESEND_API_KEY: z.string(),
 })
 
 export type Env = z.infer<typeof envSchema>
