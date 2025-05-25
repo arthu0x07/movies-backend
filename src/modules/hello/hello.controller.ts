@@ -1,4 +1,4 @@
-import { PrismaService } from '@/prisma/prisma.service'
+import { PrismaService } from '@/database/prisma/prisma.service'
 import { Controller, Get, Post } from '@nestjs/common'
 
 @Controller('/hello')
