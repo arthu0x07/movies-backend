@@ -8,6 +8,7 @@ import { AuthenticateModule } from './modules/authenticate/authenticate.module'
 import { AuthModule } from './auth/auth.module'
 import { EmailModule } from './modules/email/email.module'
 import { MoviesModule } from './modules/movies/movies.module'
+import { MovieNotificationModule } from './modules/notifications/movie-notifications.module'
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { MoviesModule } from './modules/movies/movies.module'
     UploadModule,
     UserModule,
     MoviesModule,
+    MovieNotificationModule,
   ],
 })
 export class AppModule {}

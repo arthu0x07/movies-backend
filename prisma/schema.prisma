@@ -29,13 +29,14 @@ enum Language {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  movies    Movie[]
+  id                    String                  @id @default(uuid())
+  name                  String
+  email                 String                  @unique
+  password              String
+  createdAt             DateTime                @default(now()) @map("created_at")
+  updatedAt             DateTime                @updatedAt @map("updated_at")
+  movies                Movie[]
+  UserMovieNotification UserMovieNotification[]
 
   @@map("users")
 }
@@ -65,7 +66,8 @@ model Movie {
   userId    String    @map("user_id")
   user      User      @relation(fields: [userId], references: [id])
 
-  genres Genre[] @relation("MovieGenres")
+  genres                Genre[]                 @relation("MovieGenres")
+  UserMovieNotification UserMovieNotification[]
 
   @@map("movies")
 }
@@ -76,6 +78,21 @@ model Genre {
   movies Movie[] @relation("MovieGenres")
 
   @@map("genres")
+}
+
+model UserMovieNotification {
+  id       String  @id @default(uuid())
+  userId   String
+  movieId  String
+  notified Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id])
+  movie Movie @relation(fields: [movieId], references: [id])
+
+  @@unique([userId, movieId])
+  @@map("user_movie_notifications")
 }
 
 model File {
