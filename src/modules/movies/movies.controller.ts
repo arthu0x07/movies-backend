@@ -7,13 +7,16 @@ import {
   Patch,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common'
 import { AddGenreBodyDto } from './dto/add-genre-body.dto'
 import { CreateMovieBodyDto } from './dto/create-movie.body.dto'
 import { UpdateMovieBodyDto } from './dto/update-movie.body.dto'
 import { MoviesService } from './movies.service'
 import { GetMoviesQueryDto } from './dto/get-movies-query.dto'
+import { AuthGuard } from '@nestjs/passport'
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('/movies')
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
