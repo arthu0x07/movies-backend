@@ -7,7 +7,7 @@ import { CreateAccountBodyDto } from './dto/create-account-body.dto'
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createAccount(body: CreateAccountBodyDto): Promise<void> {
+  async createAccount(body: CreateAccountBodyDto) {
     const { name, email, password } = body
 
     const userEmailExists = await this.prisma.user.findUnique({
@@ -20,12 +20,27 @@ export class UserService {
 
     const hashedPassword = await hash(password, 8)
 
-    await this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     })
+
+    return {
+      data: user,
+      meta: {
+        timestamp: new Date().toISOString(),
+        path: '/users',
+      },
+    }
   }
 }

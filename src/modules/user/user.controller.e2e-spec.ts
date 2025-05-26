@@ -1,12 +1,10 @@
 import { AppModule } from '@/app.module'
-import { PrismaService } from '@/database/prisma/prisma.service'
 import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
 
 describe('Create Account (E2E)', () => {
   let app: INestApplication
-  let prisma: PrismaService
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -14,8 +12,6 @@ describe('Create Account (E2E)', () => {
     }).compile()
 
     app = moduleRef.createNestApplication()
-
-    prisma = moduleRef.get(PrismaService)
 
     await app.init()
   })
@@ -28,13 +24,18 @@ describe('Create Account (E2E)', () => {
     })
 
     expect(response.statusCode).toBe(201)
-
-    const userOnDatabase = await prisma.user.findUnique({
-      where: {
+    expect(response.body).toEqual({
+      data: {
+        id: expect.any(String),
+        name: 'John Doe',
         email: 'johndoe@example.com',
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      },
+      meta: {
+        timestamp: expect.any(String),
+        path: '/users',
       },
     })
-
-    expect(userOnDatabase).toBeTruthy()
   })
 })

@@ -32,9 +32,9 @@ export class UserController {
   @ApiConflictResponse({
     description: 'Já existe uma conta com esse e-mail',
   })
-  async createAccount(@Body() body: CreateAccountBodyDto): Promise<void> {
+  async createAccount(@Body() body: CreateAccountBodyDto) {
     try {
-      await this.userService.createAccount(body)
+      return await this.userService.createAccount(body)
     } catch (error) {
       if (error instanceof ConflictException) {
         throw error
