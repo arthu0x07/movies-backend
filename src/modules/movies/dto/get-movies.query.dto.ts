@@ -1,11 +1,13 @@
 import { Language, MovieStatus } from '@prisma/client'
+import { Type } from 'class-transformer'
 import {
   IsArray,
   IsDateString,
   IsEnum,
+  IsInt,
   IsOptional,
   IsString,
-  IsUUID,
+  Min,
 } from 'class-validator'
 
 export class GetMoviesQueryDto {
@@ -32,10 +34,6 @@ export class GetMoviesQueryDto {
   genreIds?: string[]
 
   @IsOptional()
-  @IsUUID('4', { message: 'O userId deve ser um UUID válido' })
-  userId?: string
-
-  @IsOptional()
   @IsDateString(
     {},
     {
@@ -54,4 +52,16 @@ export class GetMoviesQueryDto {
     },
   )
   releaseDateEnd?: string
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'page deve ser um número inteiro' })
+  @Min(1, { message: 'page deve ser no mínimo 1' })
+  page?: number = 1
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'perPage deve ser um número inteiro' })
+  @Min(1, { message: 'perPage deve ser no mínimo 1' })
+  perPage?: number = 10
 }

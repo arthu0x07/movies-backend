@@ -1,65 +1,86 @@
+import { Language, MovieStatus } from '@prisma/client'
+import { Type } from 'class-transformer'
 import {
+  IsArray,
   IsDateString,
   IsEnum,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   IsUUID,
-  IsArray,
+  Min,
 } from 'class-validator'
-import { Language, MovieStatus } from '@prisma/client'
 
 export class CreateMovieBodyDto {
-  @IsString()
+  @IsString({ message: 'O título deve ser uma string.' })
+  @IsNotEmpty({ message: 'O título não pode estar vazio.' })
   title: string
 
-  @IsString()
+  @IsString({ message: 'O título original deve ser uma string.' })
+  @IsNotEmpty({ message: 'O título original não pode estar vazio.' })
   originalTitle: string
 
-  @IsString()
+  @IsString({ message: 'A descrição deve ser uma string.' })
+  @IsNotEmpty({ message: 'A descrição não pode estar vazia.' })
   description: string
 
-  @IsOptional()
-  @IsString()
-  tagline?: string
+  @IsString({ message: 'O slogan (tagline) deve ser uma string.' })
+  @IsNotEmpty({ message: 'O slogan não pode estar vazio.' })
+  tagline: string
 
-  @IsDateString()
-  releaseDate: Date
+  @IsDateString(
+    {},
+    { message: 'A data de lançamento deve ser uma data válida.' },
+  )
+  @IsNotEmpty({ message: 'A data de lançamento não pode estar vazia.' })
+  releaseDate: string
 
-  @IsNumber()
+  @Type(() => Number)
+  @IsNumber({}, { message: 'A duração deve ser um número.' })
+  @Min(0, { message: 'A duração não pode ser negativa.' })
   duration: number
 
-  @IsEnum(MovieStatus)
+  @IsEnum(MovieStatus, {
+    message:
+      'Status inválido. Valores permitidos: "RELEASED", "UNRELEASED", etc.',
+  })
+  @IsNotEmpty({ message: 'O status não pode estar vazio.' })
   status: MovieStatus
 
-  @IsEnum(Language)
+  @IsString({ message: 'O idioma deve ser uma string.' })
+  @IsNotEmpty({ message: 'O idioma não pode estar vazio.' })
   language: Language
 
-  @IsOptional()
-  @IsNumber()
-  budget?: number
+  @IsNumber({}, { message: 'O orçamento deve ser um número.' })
+  @IsNotEmpty({ message: 'O orçamento não pode estar vazio.' })
+  budget: number
 
-  @IsOptional()
-  @IsNumber()
-  revenue?: number
+  @IsNumber({}, { message: 'A receita deve ser um número.' })
+  @IsNotEmpty({ message: 'A receita não pode estar vazia.' })
+  revenue: number
 
-  @IsOptional()
-  @IsNumber()
-  popularity?: number
+  @IsNumber({}, { message: 'A popularidade deve ser um número.' })
+  @IsNotEmpty({ message: 'A popularidade não pode estar vazia.' })
+  popularity: number
 
-  @IsOptional()
-  @IsNumber()
-  votes?: number
+  @IsNumber({}, { message: 'O número de votos deve ser um número.' })
+  @IsNotEmpty({ message: 'O número de votos não pode estar vazio.' })
+  votes: number
 
-  @IsOptional()
-  @IsNumber()
-  ratingPercentage?: number
+  @IsNumber({}, { message: 'A porcentagem de avaliação deve ser um número.' })
+  @IsNotEmpty({ message: 'A porcentagem de avaliação não pode estar vazia.' })
+  ratingPercentage: number
 
-  @IsUUID()
-  userId: string
+  @IsArray({ message: 'Os gêneros devem ser um array.' })
+  @IsUUID('all', {
+    each: true,
+    message: 'Cada gênero deve ser um UUID válido.',
+  })
+  @IsNotEmpty({ message: 'Os gêneros não podem estar vazios.' })
+  genresIds: string[]
 
+  @IsUUID(undefined, { message: 'O ID do arquivo deve ser um UUID válido.' })
   @IsOptional()
-  @IsArray()
-  @IsUUID('all', { each: true })
-  genresIds?: string[]
+  fileId: string
 }
