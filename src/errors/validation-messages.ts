@@ -10,7 +10,7 @@ export const ValidationMessages = {
   FILE_REQUIRED: 'O arquivo é obrigatório',
   INVALID_FILE_TYPE:
     'Tipo de arquivo inválido. Envie uma imagem (jpg, jpeg, png ou webp)',
-  FILE_TOO_LARGE: 'O arquivo excede o tamanho máximo permitido de 5MB',
+  FILE_TOO_LARGE: 'O arquivo excede o tamanho máximo permitido de 15MB',
   FILE_UUID: 'O ID do arquivo deve ser um UUID válido.',
 
   // Movie - Strings

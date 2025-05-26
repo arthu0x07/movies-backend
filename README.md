@@ -15,12 +15,23 @@ API para projeto técnico da Cubos Academy <br /><br />
 - Swagger para documentação de API
 - Envio de E-mails
 - Upload de imagens
+- Sistema de Logs e Monitoramento
+- Rate Limiting e Proteção contra abusos
+- Health Check para monitoramento da aplicação
 
 <br /><br />
 
 ## Descrição
 
-- (Preencher)
+API RESTful para gerenciamento de filmes com recursos avançados de segurança e monitoramento:
+
+- Sistema completo de autenticação e autorização
+- Upload e validação de imagens
+- Gerenciamento de filmes e gêneros
+- Logs detalhados de todas as operações
+- Proteção contra ataques de força bruta
+- Monitoramento de saúde da aplicação e banco de dados
+- Respostas padronizadas em formato JSON com metadados
 
 <br /><br />
 
@@ -31,6 +42,12 @@ Para rodar esse projeto, você vai precisar adicionar as seguintes variáveis de
 `DATABASE_URL` - _URL utilizada para se conectar com o banco de dados. (termina com @postgres:5432)_
 
 `PORT` - _Porta específica para rodar a aplicação, caso não passe nenhuma, a 3333 será o padrão._
+
+`JWT_SECRET` - _Chave secreta para geração de tokens JWT_
+
+`THROTTLE_TTL` - _Tempo em segundos para o rate limiting (padrão: 60)_
+
+`THROTTLE_LIMIT` - _Número máximo de requisições por TTL (padrão: 10)_
 
 <br /><br />
 
@@ -113,14 +130,17 @@ Para rodar os testes, faça o processo de instalação do projeto, e rode os seg
 
 ## Funcionalidades
 
-- EsLint e Prettier para melhor organização e padronização do projeto.
-
-- Containerização com Docker para facilitar a execução da aplicação.
-
-- Persistência em banco de dados utilizando volumes.
-
-- Banco de dados separados para execução dos testes.
-
-- Validação e tipagem de variáveis ambientes.
-
-- Ferramentas para testes pré-configuradas.
+- EsLint e Prettier para melhor organização e padronização do projeto
+- Containerização com Docker para facilitar a execução da aplicação
+- Persistência em banco de dados utilizando volumes
+- Banco de dados separados para execução dos testes
+- Validação e tipagem de variáveis ambientes
+- Ferramentas para testes pré-configuradas
+- Sistema de logs detalhado para todas as requisições
+- Rate limiting para proteção contra abusos
+- Health check endpoints para monitoramento
+- Respostas padronizadas com metadados
+- Validação avançada de arquivos no upload
+- Documentação completa via Swagger
+- Proteção contra ataques de força bruta
+- Monitoramento de saúde do banco de dados
