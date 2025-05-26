@@ -8,22 +8,41 @@ import {
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { ApiBearerAuth } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger'
+import { FileUploadDto } from './dto/file-upload.dto'
 import { ParseFilePipe } from './pipes/parse-file-pipe'
 import { UploadedFile as UploadedFileResponse } from './upload.interface'
 import { FileUploadService } from './upload.service'
 
-@UseGuards(AuthGuard('jwt'))
+@ApiTags('Upload')
 @ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
 @Controller('/upload')
 export class FileUploadController {
   constructor(private readonly fileUploadService: FileUploadService) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Upload de arquivo' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Arquivo a ser enviado',
+    type: FileUploadDto,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Arquivo enviado com sucesso',
+  })
   async handleUpload(
     @UploadedFile(new ParseFilePipe()) file: Express.Multer.File,
-  ): Promise<{ fileId: string }> {
+  ) {
     if (!file) {
       throw new BadRequestException('File is required')
     }
@@ -41,6 +60,12 @@ export class FileUploadController {
       )
     }
 
-    return { fileId: uploadedFile.id }
+    return {
+      data: { fileId: uploadedFile.id },
+      meta: {
+        timestamp: new Date().toISOString(),
+        path: '/upload',
+      },
+    }
   }
 }

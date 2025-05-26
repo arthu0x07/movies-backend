@@ -53,11 +53,18 @@ describe('File upload (E2E)', () => {
       .attach('file', './test/e2e/image.png')
 
     expect(response.statusCode).toBe(201)
-    expect(response.body).toHaveProperty('fileId')
-    expect(typeof response.body.fileId).toBe('string')
+    expect(response.body).toEqual({
+      data: {
+        fileId: expect.any(String),
+      },
+      meta: {
+        timestamp: expect.any(String),
+        path: '/upload',
+      },
+    })
 
     const file = await prisma.file.findUnique({
-      where: { id: response.body.fileId },
+      where: { id: response.body.data.fileId },
     })
     expect(file).toBeTruthy()
   })
