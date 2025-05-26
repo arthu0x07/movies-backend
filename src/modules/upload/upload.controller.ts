@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Controller,
-  ParseFilePipe,
   Post,
   UploadedFile,
   UseGuards,
@@ -9,6 +8,7 @@ import {
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { ParseFilePipe } from './pipes/parse-file-pipe'
 import { UploadedFile as UploadedFileResponse } from './upload.interface'
 import { FileUploadService } from './upload.service'
 
