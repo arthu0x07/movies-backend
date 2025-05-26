@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common'
 
 import { slugify } from '@/utils/slugify.util'
-import { Genre, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { CreateMovieBodyDto } from './dto/create-movie.body.dto'
 import { GetMoviesQueryDto } from './dto/get-movies.query.dto'
 import { UpdateMovieBodyDto } from './dto/update-movie.body.dto'
@@ -51,7 +51,13 @@ export class MoviesService {
       },
     })
 
-    return movie
+    return {
+      data: movie,
+      meta: {
+        timestamp: new Date().toISOString(),
+        path: '/movies',
+      },
+    }
   }
 
   async listAllMovies(query: GetMoviesQueryDto) {
@@ -109,6 +115,7 @@ export class MoviesService {
         page,
         perPage,
         totalPages: Math.ceil(total / perPage),
+        path: '/movies',
       },
     }
   }
@@ -139,6 +146,7 @@ export class MoviesService {
         page,
         perPage,
         totalPages: Math.ceil(total / perPage),
+        path: '/movies/user',
       },
     }
   }
@@ -157,7 +165,13 @@ export class MoviesService {
       throw new NotFoundException('Movie not found.')
     }
 
-    return movie
+    return {
+      data: movie,
+      meta: {
+        timestamp: new Date().toISOString(),
+        path: `/movies/${slug}`,
+      },
+    }
   }
 
   async updateMovie(
@@ -189,48 +203,70 @@ export class MoviesService {
       throw new BadRequestException('Updating slug is not allowed.')
     }
 
-    const updateData = { ...params }
+    const { genresIds, ...rest } = params
 
-    if (params.genresIds) {
-      const updateData = { ...params } as Partial<UpdateMovieBodyDto> & {
-        genres?: Genre
-      }
-
-      delete updateData.genresIds
-    }
-
-    if (params.releaseDate) {
-      updateData.releaseDate = new Date(params.releaseDate).toISOString()
-    }
-
-    const updated = await this.prisma.movie.update({
-      where: { id: movieId, userId },
-      data: updateData,
+    const updatedMovie = await this.prisma.movie.update({
+      where: { id: movieId },
+      data: {
+        ...rest,
+        genres: genresIds?.length
+          ? {
+              set: genresIds.map((id) => ({ id })),
+            }
+          : undefined,
+      },
+      include: {
+        genres: true,
+        user: true,
+        file: true,
+      },
     })
 
-    return updated
+    return {
+      data: updatedMovie,
+      meta: {
+        timestamp: new Date().toISOString(),
+        path: `/movies/${movieId}`,
+      },
+    }
   }
 
   async deleteMovie(movieId: string, userId: string) {
-    const movie = await this.prisma.movie.findUnique({ where: { id: movieId } })
-
-    if (!movie) {
-      throw new NotFoundException('Movie not found.')
-    }
+    const movie = await this.validateMovieExists(movieId)
 
     if (movie.userId !== userId) {
       throw new ForbiddenException('You are not allowed to delete this movie.')
     }
 
-    return this.prisma.movie.delete({ where: { id: movieId } })
+    const deletedMovie = await this.prisma.movie.delete({
+      where: { id: movieId },
+      include: {
+        genres: true,
+        user: true,
+        file: true,
+      },
+    })
+
+    return {
+      data: deletedMovie,
+      meta: {
+        timestamp: new Date().toISOString(),
+        path: `/movies/${movieId}`,
+      },
+    }
   }
 
   async addGenresToMovie(movieId: string, genreIds: string[], userId: string) {
-    await this.validateMovieExists(movieId)
+    const movie = await this.validateMovieExists(movieId)
+
+    if (movie.userId !== userId) {
+      throw new ForbiddenException('You are not allowed to modify this movie.')
+    }
+
     await this.validateGenresExist(genreIds)
 
-    return this.prisma.movie.update({
-      where: { id: movieId, userId },
+    const updatedMovie = await this.prisma.movie.update({
+      where: { id: movieId },
       data: {
         genres: {
           connect: genreIds.map((id) => ({ id })),
@@ -238,28 +274,40 @@ export class MoviesService {
       },
       include: {
         genres: true,
+        user: true,
+        file: true,
       },
     })
+
+    return {
+      data: updatedMovie,
+      meta: {
+        timestamp: new Date().toISOString(),
+        path: `/movies/${movieId}/genres`,
+      },
+    }
   }
 
   async removeGenreFromMovie(movieId: string, genreId: string, userId: string) {
-    const movie = await this.prisma.movie.findUnique({
-      where: { id: movieId, userId },
-      include: { genres: true },
-    })
+    const movie = await this.validateMovieExists(movieId)
 
-    if (!movie) {
-      throw new NotFoundException('Movie not found.')
+    if (movie.userId !== userId) {
+      throw new ForbiddenException('You are not allowed to modify this movie.')
     }
 
-    const isGenreAssociated = movie.genres.some((genre) => genre.id === genreId)
+    const genreExists = await this.prisma.movie.findFirst({
+      where: {
+        id: movieId,
+        genres: { some: { id: genreId } },
+      },
+    })
 
-    if (!isGenreAssociated) {
+    if (!genreExists) {
       throw new NotFoundException('Genre is not associated with the movie.')
     }
 
-    return this.prisma.movie.update({
-      where: { id: movieId, userId },
+    const updatedMovie = await this.prisma.movie.update({
+      where: { id: movieId },
       data: {
         genres: {
           disconnect: { id: genreId },
@@ -267,44 +315,61 @@ export class MoviesService {
       },
       include: {
         genres: true,
+        user: true,
+        file: true,
       },
     })
+
+    return {
+      data: updatedMovie,
+      meta: {
+        timestamp: new Date().toISOString(),
+        path: `/movies/${movieId}/genres/${genreId}`,
+      },
+    }
   }
 
   private async validateUserExists(userId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } })
-
     if (!user) {
       throw new NotFoundException('User not found.')
     }
+    return user
   }
 
   private async validateGenresExist(genreIds: string[]) {
     if (!genreIds?.length) return
 
-    const foundGenres = await this.prisma.genre.findMany({
+    const genres = await this.prisma.genre.findMany({
       where: { id: { in: genreIds } },
     })
 
-    if (foundGenres.length !== genreIds.length) {
-      throw new NotFoundException('One or more genres not found.')
+    if (genres.length !== genreIds.length) {
+      throw new NotFoundException('Genre not found')
     }
+
+    return genres
   }
 
   private async validateFileExists(fileId?: string) {
-    if (!fileId) {
-      return
-    }
+    if (!fileId) return
 
     const file = await this.prisma.file.findUnique({ where: { id: fileId } })
-
     if (!file) {
       throw new NotFoundException('File not found.')
     }
+    return file
   }
 
   private async validateMovieExists(movieId: string) {
-    const movie = await this.prisma.movie.findUnique({ where: { id: movieId } })
+    const movie = await this.prisma.movie.findUnique({
+      where: { id: movieId },
+      include: {
+        genres: true,
+        user: true,
+        file: true,
+      },
+    })
 
     if (!movie) {
       throw new NotFoundException('Movie not found.')

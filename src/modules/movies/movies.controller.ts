@@ -194,28 +194,20 @@ export class MoviesController {
     const userId = user.sub
     const page = Number(query.page) || 1
     const perPage = Number(query.perPage) || 10
+
     return this.moviesService.listMoviesByUser(userId, page, perPage)
   }
 
   @Get('/:slug')
-  @ApiOperation({ summary: 'Obter filme pelo slug' })
+  @ApiOperation({ summary: 'Obter filme por slug' })
   @ApiParam({
     name: 'slug',
-    description: 'Identificador único do filme (slug)',
-    example: 'meu-filme-exemplo',
+    description: 'Slug do filme',
+    example: 'filme-exemplo',
   })
   @ApiResponse({
     status: 200,
-    description: 'Detalhes do filme retornados com sucesso',
-    schema: {
-      example: {
-        id: 'uuid-filme-exemplo',
-        title: 'Filme Exemplo',
-        slug: 'meu-filme-exemplo',
-        description: 'Descrição do filme',
-        // demais campos...
-      },
-    },
+    description: 'Filme encontrado com sucesso',
   })
   @ApiResponse({ status: 404, description: 'Filme não encontrado' })
   async getMovieBySlug(@Param('slug') slug: string) {
@@ -223,23 +215,16 @@ export class MoviesController {
   }
 
   @Patch('/:movieId')
-  @ApiOperation({ summary: 'Atualizar dados de um filme' })
+  @ApiOperation({ summary: 'Atualizar filme por ID' })
   @ApiParam({
     name: 'movieId',
-    description: 'ID do filme a ser atualizado',
+    description: 'ID do filme',
     example: 'uuid-filme-exemplo',
   })
   @ApiBody({ type: UpdateMovieBodyDto })
   @ApiResponse({
     status: 200,
     description: 'Filme atualizado com sucesso',
-    schema: {
-      example: {
-        id: 'uuid-filme-exemplo',
-        title: 'Filme Atualizado',
-        // demais campos...
-      },
-    },
   })
   @ApiResponse({ status: 404, description: 'Filme não encontrado' })
   async updateMovie(
@@ -252,13 +237,16 @@ export class MoviesController {
   }
 
   @Delete('/:movieId')
-  @ApiOperation({ summary: 'Excluir um filme' })
+  @ApiOperation({ summary: 'Excluir filme por ID' })
   @ApiParam({
     name: 'movieId',
-    description: 'ID do filme a ser removido',
+    description: 'ID do filme',
     example: 'uuid-filme-exemplo',
   })
-  @ApiResponse({ status: 200, description: 'Filme excluído com sucesso' })
+  @ApiResponse({
+    status: 200,
+    description: 'Filme excluído com sucesso',
+  })
   @ApiResponse({ status: 404, description: 'Filme não encontrado' })
   async deleteMovie(
     @Param('movieId') movieId: string,
@@ -276,8 +264,11 @@ export class MoviesController {
     example: 'uuid-filme-exemplo',
   })
   @ApiBody({ type: AddGenreBodyDto })
-  @ApiResponse({ status: 200, description: 'Gêneros adicionados com sucesso' })
-  @ApiResponse({ status: 404, description: 'Filme ou gêneros não encontrados' })
+  @ApiResponse({
+    status: 201,
+    description: 'Gêneros adicionados com sucesso',
+  })
+  @ApiResponse({ status: 404, description: 'Filme ou gênero não encontrado' })
   async addGenresToMovie(
     @Param('movieId') movieId: string,
     @Body() body: AddGenreBodyDto,
@@ -288,7 +279,7 @@ export class MoviesController {
   }
 
   @Delete('/:movieId/genres/:genreId')
-  @ApiOperation({ summary: 'Remover um gênero de um filme' })
+  @ApiOperation({ summary: 'Remover gênero de um filme' })
   @ApiParam({
     name: 'movieId',
     description: 'ID do filme',
@@ -299,8 +290,14 @@ export class MoviesController {
     description: 'ID do gênero',
     example: 'uuid-genero-exemplo',
   })
-  @ApiResponse({ status: 200, description: 'Gênero removido com sucesso' })
-  @ApiResponse({ status: 404, description: 'Filme ou gênero não encontrado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Gênero removido com sucesso',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Filme ou gênero não encontrado',
+  })
   async removeGenreFromMovie(
     @Param('movieId') movieId: string,
     @Param('genreId') genreId: string,

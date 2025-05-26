@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsArray, IsUUID } from 'class-validator'
+import { IsArray, IsString } from 'class-validator'
 
 export class AddGenreBodyDto {
   @ApiProperty({
@@ -11,6 +11,6 @@ export class AddGenreBodyDto {
     ],
   })
   @IsArray()
-  @IsUUID('all', { each: true })
+  @IsString({ each: true })
   genreIds: string[]
 }

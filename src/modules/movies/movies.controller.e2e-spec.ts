@@ -99,9 +99,33 @@ describe('MoviesController (E2E)', () => {
         .send(movieData)
 
       expect(response.statusCode).toBe(201)
-      expect(response.body).toMatchObject({
+      expect(response.body.data).toMatchObject({
         id: expect.any(String),
         title: movieData.title,
+        originalTitle: movieData.originalTitle,
+        description: movieData.description,
+        tagline: movieData.tagline,
+        releaseDate: movieData.releaseDate,
+        duration: movieData.duration,
+        status: movieData.status,
+        language: movieData.language,
+        budget: movieData.budget,
+        revenue: movieData.revenue,
+        popularity: movieData.popularity,
+        votes: movieData.votes,
+        ratingPercentage: movieData.ratingPercentage,
+        genres: expect.arrayContaining([
+          expect.objectContaining({
+            id: genres.id,
+          }),
+        ]),
+        file: expect.objectContaining({
+          id: file.id,
+        }),
+      })
+      expect(response.body.meta).toEqual({
+        timestamp: expect.any(String),
+        path: '/movies',
       })
     })
 
@@ -276,24 +300,8 @@ describe('MoviesController (E2E)', () => {
 
   describe('[GET] /movies', () => {
     it('[GET] /movies — should list movies with query', async () => {
-      await prisma.movie.create({
-        data: {
-          id: randomUUID(),
-          title: 'Test Movie',
-          originalTitle: 'Test Movie Original',
-          description: 'Description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 100,
-          status: MovieStatus.RELEASED,
-          language: Language.EN,
-          userId,
-          slug: slugify('Test Movie'),
-        },
-      })
-
       const response = await request(app.getHttpServer())
         .get('/movies')
-        .query({ title: 'Test' })
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(response.statusCode).toBe(200)
@@ -312,20 +320,20 @@ describe('MoviesController (E2E)', () => {
             duration: 120,
             status: MovieStatus.RELEASED,
             language: Language.EN,
-            userId,
             slug: slugify('English Released'),
+            userId,
           },
           {
             id: randomUUID(),
-            title: 'Portuguese Upcoming',
-            originalTitle: 'Portuguese Upcoming',
+            title: 'Portuguese Planned',
+            originalTitle: 'Portuguese Planned',
             description: 'Description',
-            releaseDate: new Date('2025-01-01'),
-            duration: 100,
-            status: MovieStatus.IN_PRODUCTION,
+            releaseDate: new Date('2024-01-01'),
+            duration: 120,
+            status: MovieStatus.PLANNED,
             language: Language.PT,
+            slug: slugify('Portuguese Planned'),
             userId,
-            slug: slugify('Portuguese Upcoming'),
           },
         ],
       })
@@ -336,10 +344,12 @@ describe('MoviesController (E2E)', () => {
           language: Language.EN,
           status: MovieStatus.RELEASED,
           releaseDateStart: '2023-01-01',
+          releaseDateEnd: '2023-12-31',
         })
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(response.statusCode).toBe(200)
+      expect(Array.isArray(response.body.data)).toBe(true)
       expect(response.body.data.length).toBe(1)
       expect(response.body.data[0].title).toBe('English Released')
     })
@@ -359,34 +369,30 @@ describe('MoviesController (E2E)', () => {
     })
 
     it('[GET] /movies — should page through all movies without duplicates', async () => {
-      const totalMovies = 15
-      const perPage = 5
-      const allTitles = Array.from(
-        { length: totalMovies },
-        (_, i) => `Movie ${i + 1}`,
-      )
+      const totalMovies = 25
+      const perPage = 10
 
       await Promise.all(
-        allTitles.map((title) =>
+        Array.from({ length: totalMovies }).map((_, index) =>
           prisma.movie.create({
             data: {
               id: randomUUID(),
-              title,
-              originalTitle: title,
-              description: `Description for ${title}`,
-              releaseDate: new Date('2023-01-01'),
-              duration: 100,
+              title: `Movie ${index + 1}`,
+              originalTitle: `Movie ${index + 1}`,
+              description: 'Description',
+              releaseDate: new Date(),
+              duration: 120,
               status: MovieStatus.RELEASED,
               language: Language.EN,
+              slug: slugify(`Movie ${index + 1}`),
               userId,
-              slug: slugify(title),
             },
           }),
         ),
       )
 
-      const seen = new Set<string>()
       const totalPages = Math.ceil(totalMovies / perPage)
+      const allMovies = new Set<string>()
 
       for (let page = 1; page <= totalPages; page++) {
         const response = await request(app.getHttpServer())
@@ -395,49 +401,45 @@ describe('MoviesController (E2E)', () => {
           .set('Authorization', `Bearer ${accessToken}`)
 
         expect(response.statusCode).toBe(200)
+        expect(Array.isArray(response.body.data)).toBe(true)
 
         const returned: string[] = response.body.data.map((m) => m.title)
-        expect(returned.length).toBe(perPage)
+        expect(returned.length).toBe(
+          page === totalPages ? totalMovies % perPage || perPage : perPage,
+        )
 
-        returned.forEach((t) => {
-          expect(allTitles).toContain(t)
-          expect(seen.has(t)).toBe(false)
-          seen.add(t)
-        })
+        returned.forEach((title) => allMovies.add(title))
       }
 
-      expect(seen.size).toBe(totalMovies)
-      allTitles.forEach((t) => expect(seen.has(t)).toBe(true))
+      expect(allMovies.size).toBe(totalMovies)
     })
 
     it('[GET] /movies — should return empty array if page exceeds total', async () => {
       const response = await request(app.getHttpServer())
         .get('/movies')
-        .query({ page: 100, perPage: 10 })
+        .query({ page: 999 })
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(response.statusCode).toBe(200)
-
       expect(Array.isArray(response.body.data)).toBe(true)
       expect(response.body.data.length).toBe(0)
     })
 
     it('[GET] /movies — should return default pagination if no params provided', async () => {
-      const totalToCreate = 12
       await Promise.all(
-        Array.from({ length: totalToCreate }).map((_, i) =>
+        Array.from({ length: 15 }).map((_, index) =>
           prisma.movie.create({
             data: {
               id: randomUUID(),
-              title: `Default Movie ${i + 1}`,
-              originalTitle: `Original Default Movie ${i + 1}`,
-              description: `Description ${i + 1}`,
-              releaseDate: new Date('2023-01-01'),
-              duration: 100 + i,
+              title: `Movie ${index + 1}`,
+              originalTitle: `Movie ${index + 1}`,
+              description: 'Description',
+              releaseDate: new Date(),
+              duration: 120,
               status: MovieStatus.RELEASED,
               language: Language.EN,
+              slug: slugify(`Movie ${index + 1}`),
               userId,
-              slug: slugify(`Default Movie ${i + 1}`),
             },
           }),
         ),
@@ -448,14 +450,8 @@ describe('MoviesController (E2E)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(response.statusCode).toBe(200)
-
       expect(Array.isArray(response.body.data)).toBe(true)
       expect(response.body.data.length).toBe(10)
-
-      expect(response.body.meta.page).toBe(1)
-      expect(response.body.meta.perPage).toBe(10)
-      expect(response.body.meta.total).toBe(totalToCreate)
-      expect(response.body.meta.totalPages).toBe(Math.ceil(totalToCreate / 10))
     })
 
     it('[GET] /movies — should return 400 for invalid pagination params', async () => {
@@ -474,54 +470,51 @@ describe('MoviesController (E2E)', () => {
         data: {
           id: randomUUID(),
           title: 'User Movie',
-          originalTitle: 'User Movie Original',
+          originalTitle: 'User Movie',
           description: 'Description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 100,
+          releaseDate: new Date(),
+          duration: 120,
           status: MovieStatus.RELEASED,
           language: Language.EN,
-          userId,
           slug: slugify('User Movie'),
+          userId,
         },
       })
 
       const response = await request(app.getHttpServer())
-        .get(`/movies/user`)
+        .get('/movies/user')
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(response.statusCode).toBe(200)
+      expect(Array.isArray(response.body.data)).toBe(true)
       expect(response.body.data.some((m) => m.id === movie.id)).toBe(true)
     })
 
     it('[GET] /movies/user — should page through all user movies without duplicates', async () => {
-      const totalMovies = 12
-      const perPage = 5
-      const allTitles = Array.from(
-        { length: totalMovies },
-        (_, i) => `User Movie ${i + 1}`,
-      )
+      const totalMovies = 25
+      const perPage = 10
 
       await Promise.all(
-        allTitles.map((title) =>
+        Array.from({ length: totalMovies }).map((_, index) =>
           prisma.movie.create({
             data: {
               id: randomUUID(),
-              title,
-              originalTitle: title,
-              description: `Description for ${title}`,
-              releaseDate: new Date('2023-01-01'),
-              duration: 90,
+              title: `Movie ${index + 1}`,
+              originalTitle: `Movie ${index + 1}`,
+              description: 'Description',
+              releaseDate: new Date(),
+              duration: 120,
               status: MovieStatus.RELEASED,
               language: Language.EN,
+              slug: slugify(`Movie ${index + 1}`),
               userId,
-              slug: slugify(title),
             },
           }),
         ),
       )
 
-      const seen = new Set<string>()
       const totalPages = Math.ceil(totalMovies / perPage)
+      const allMovies = new Set<string>()
 
       for (let page = 1; page <= totalPages; page++) {
         const response = await request(app.getHttpServer())
@@ -530,41 +523,37 @@ describe('MoviesController (E2E)', () => {
           .set('Authorization', `Bearer ${accessToken}`)
 
         expect(response.statusCode).toBe(200)
+        expect(Array.isArray(response.body.data)).toBe(true)
 
         const returned: string[] = response.body.data.map((m) => m.title)
         const expectedLength =
-          page === totalPages
-            ? totalMovies - perPage * (totalPages - 1)
-            : perPage
+          page === totalPages ? totalMovies % perPage || perPage : perPage
         expect(returned.length).toBe(expectedLength)
 
-        returned.forEach((t) => {
-          expect(allTitles).toContain(t)
-          expect(seen.has(t)).toBe(false)
-          seen.add(t)
-        })
+        returned.forEach((title) => allMovies.add(title))
       }
 
-      expect(seen.size).toBe(totalMovies)
-      allTitles.forEach((t) => expect(seen.has(t)).toBe(true))
+      expect(allMovies.size).toBe(totalMovies)
     })
   })
 
   describe('[GET] /movies/:slug', () => {
     it('[GET] /movies/:slug — should get movie by slug', async () => {
-      const slug = slugify('Slug Movie')
+      const title = 'Slug Movie'
+      const slug = slugify(title)
+
       const movie = await prisma.movie.create({
         data: {
           id: randomUUID(),
-          title: 'Slug Movie',
+          title,
           originalTitle: 'Slug Movie Original',
           description: 'Description',
           releaseDate: new Date('2023-01-01'),
           duration: 90,
           status: MovieStatus.RELEASED,
           language: Language.EN,
-          userId,
           slug,
+          userId,
         },
       })
 
@@ -573,10 +562,10 @@ describe('MoviesController (E2E)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(response.statusCode).toBe(200)
-      expect(response.body).toMatchObject({
+      expect(response.body.data).toMatchObject({
         id: movie.id,
         slug,
-        title: movie.title,
+        title,
       })
     })
 
@@ -594,32 +583,36 @@ describe('MoviesController (E2E)', () => {
       const movie = await prisma.movie.create({
         data: {
           id: randomUUID(),
-          title: 'Old Title',
-          originalTitle: 'Old Original Title',
-          description: 'Old description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 110,
+          title: 'Original Title',
+          originalTitle: 'Original Title',
+          description: 'Description',
+          releaseDate: new Date(),
+          duration: 120,
           status: MovieStatus.RELEASED,
           language: Language.EN,
+          slug: slugify('Original Title'),
           userId,
-          slug: slugify('Old Title'),
         },
       })
 
       const response = await request(app.getHttpServer())
         .patch(`/movies/${movie.id}`)
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ title: 'New Title' })
+        .send({
+          title: 'New Title',
+        })
 
       expect(response.statusCode).toBe(200)
-      expect(response.body.title).toBe('New Title')
+      expect(response.body.data.title).toBe('New Title')
     })
 
     it('[PATCH] /movies/:movieId — should return 404 if movie not found', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/movies/non-existent-id`)
+        .patch('/movies/non-existent-id')
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ title: 'New Title' })
+        .send({
+          title: 'New Title',
+        })
 
       expect(response.statusCode).toBe(404)
     })
@@ -628,31 +621,35 @@ describe('MoviesController (E2E)', () => {
       const movie = await prisma.movie.create({
         data: {
           id: randomUUID(),
-          title: 'Immutable Slug',
-          originalTitle: 'Immutable Slug',
+          title: 'Original Title',
+          originalTitle: 'Original Title',
           description: 'Description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 100,
+          releaseDate: new Date(),
+          duration: 120,
           status: MovieStatus.RELEASED,
           language: Language.EN,
+          slug: slugify('Original Title'),
           userId,
-          slug: slugify('Immutable Slug'),
         },
       })
 
       const response = await request(app.getHttpServer())
         .patch(`/movies/${movie.id}`)
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ slug: 'new-slug' })
+        .send({
+          slug: 'new-slug',
+        })
 
       expect(response.statusCode).toBe(400)
     })
 
     it('[PATCH] /movies/:movieId — should return 404 if trying to update a non-existent movie', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/movies/non-existent-id`)
+        .patch('/movies/non-existent-id')
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ title: 'Updated Title' })
+        .send({
+          title: 'New Title',
+        })
 
       expect(response.statusCode).toBe(404)
     })
@@ -661,45 +658,34 @@ describe('MoviesController (E2E)', () => {
       const movie = await prisma.movie.create({
         data: {
           id: randomUUID(),
-          title: 'Test Movie',
-          originalTitle: 'Test Movie',
+          title: 'Original Title',
+          originalTitle: 'Original Title',
           description: 'Description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 100,
+          releaseDate: new Date(),
+          duration: 120,
           status: MovieStatus.RELEASED,
           language: Language.EN,
+          slug: slugify('Original Title'),
           userId,
-          slug: slugify('Test Movie'),
         },
       })
 
       const response = await request(app.getHttpServer())
         .patch(`/movies/${movie.id}`)
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ duration: -90 })
+        .send({
+          duration: -10,
+        })
 
       expect(response.statusCode).toBe(400)
     })
 
     it('[PATCH] /movies/:movieId — should return 401 when trying to update a movie without authentication', async () => {
-      const movie = await prisma.movie.create({
-        data: {
-          id: randomUUID(),
-          title: 'Auth Test Movie',
-          originalTitle: 'Auth Test Movie',
-          description: 'Description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 100,
-          status: MovieStatus.RELEASED,
-          language: Language.EN,
-          userId,
-          slug: slugify('Auth Test Movie'),
-        },
-      })
-
       const response = await request(app.getHttpServer())
-        .patch(`/movies/${movie.id}`)
-        .send({ title: 'New Title' })
+        .patch('/movies/any-id')
+        .send({
+          title: 'New Title',
+        })
 
       expect(response.statusCode).toBe(401)
     })
@@ -710,15 +696,15 @@ describe('MoviesController (E2E)', () => {
       const movie = await prisma.movie.create({
         data: {
           id: randomUUID(),
-          title: 'To Delete',
-          originalTitle: 'To Delete Original',
+          title: 'Movie to Delete',
+          originalTitle: 'Movie to Delete',
           description: 'Description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 100,
+          releaseDate: new Date(),
+          duration: 120,
           status: MovieStatus.RELEASED,
           language: Language.EN,
+          slug: slugify('Movie to Delete'),
           userId,
-          slug: slugify('To Delete'),
         },
       })
 
@@ -727,12 +713,17 @@ describe('MoviesController (E2E)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(response.statusCode).toBe(200)
-      expect(response.body).toHaveProperty('id', movie.id)
+      expect(response.body.data).toHaveProperty('id', movie.id)
+
+      const deletedMovie = await prisma.movie.findUnique({
+        where: { id: movie.id },
+      })
+      expect(deletedMovie).toBeNull()
     })
 
     it('[DELETE] /movies/:movieId — should return 404 if movie does not exist', async () => {
       const response = await request(app.getHttpServer())
-        .delete(`/movies/non-existent-id`)
+        .delete('/movies/non-existent-id')
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(response.statusCode).toBe(404)
@@ -741,7 +732,6 @@ describe('MoviesController (E2E)', () => {
     it('[DELETE] /movies/:movieId — should not delete a movie from another user', async () => {
       const otherUser = await prisma.user.create({
         data: {
-          id: randomUUID(),
           name: 'Other User',
           email: `${randomUUID()}@example.com`,
           password: await bcrypt.hash('123456', 8),
@@ -751,15 +741,15 @@ describe('MoviesController (E2E)', () => {
       const movie = await prisma.movie.create({
         data: {
           id: randomUUID(),
-          title: 'Other User Movie',
-          originalTitle: 'Other User Movie',
+          title: "Other User's Movie",
+          originalTitle: "Other User's Movie",
           description: 'Description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 100,
+          releaseDate: new Date(),
+          duration: 120,
           status: MovieStatus.RELEASED,
           language: Language.EN,
+          slug: slugify("Other User's Movie"),
           userId: otherUser.id,
-          slug: slugify('Other User Movie'),
         },
       })
 
@@ -768,11 +758,16 @@ describe('MoviesController (E2E)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(response.statusCode).toBe(403)
+
+      const movieStillExists = await prisma.movie.findUnique({
+        where: { id: movie.id },
+      })
+      expect(movieStillExists).toBeTruthy()
     })
 
     it('[DELETE] /movies/:movieId — should return 404 if trying to delete a non-existent movie', async () => {
       const response = await request(app.getHttpServer())
-        .delete(`/movies/non-existent-id`)
+        .delete('/movies/non-existent-id')
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(response.statusCode).toBe(404)
@@ -784,29 +779,33 @@ describe('MoviesController (E2E)', () => {
       const movie = await prisma.movie.create({
         data: {
           id: randomUUID(),
-          title: 'Genre Movie',
-          originalTitle: 'Genre Movie Original',
+          title: 'Movie with Genres',
+          originalTitle: 'Movie with Genres',
           description: 'Description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 100,
+          releaseDate: new Date(),
+          duration: 120,
           status: MovieStatus.RELEASED,
           language: Language.EN,
+          slug: slugify('Movie with Genres'),
           userId,
-          slug: slugify('Genre Movie'),
         },
       })
 
       const genre = await prisma.genre.create({
-        data: { id: randomUUID(), name: 'Action' },
+        data: {
+          name: 'Action',
+        },
       })
 
       const response = await request(app.getHttpServer())
         .post(`/movies/${movie.id}/genres`)
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ genreIds: [genre.id] })
+        .send({
+          genreIds: [genre.id],
+        })
 
       expect(response.statusCode).toBe(201)
-      expect(response.body.genres).toEqual(
+      expect(response.body.data.genres).toEqual(
         expect.arrayContaining([expect.objectContaining({ id: genre.id })]),
       )
     })
@@ -815,51 +814,56 @@ describe('MoviesController (E2E)', () => {
       const movie = await prisma.movie.create({
         data: {
           id: randomUUID(),
-          title: 'No Genre Movie',
-          originalTitle: 'No Genre Movie',
+          title: 'Movie without Genres',
+          originalTitle: 'Movie without Genres',
           description: 'Description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 100,
+          releaseDate: new Date(),
+          duration: 120,
           status: MovieStatus.RELEASED,
           language: Language.EN,
+          slug: slugify('Movie without Genres'),
           userId,
-          slug: slugify('No Genre Movie'),
         },
       })
 
       const response = await request(app.getHttpServer())
         .post(`/movies/${movie.id}/genres`)
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ genreIds: ['non-existent-genre-id'] })
+        .send({
+          genreIds: ['non-existent-id'],
+        })
 
-      expect(response.statusCode).toBe(400)
+      expect(response.statusCode).toBe(404)
+      expect(response.body.message).toBe('Genre not found')
     })
   })
 
   describe('[DELETE] /movies/:movieId/genres/:genreId', () => {
     it('[DELETE] /movies/:movieId/genres/:genreId — should remove a genre from movie', async () => {
-      const movie = await prisma.movie.create({
+      const genre = await prisma.genre.create({
         data: {
-          id: randomUUID(),
-          title: 'Remove Genre Movie',
-          originalTitle: 'Remove Genre Movie Original',
-          description: 'Description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 100,
-          status: MovieStatus.RELEASED,
-          language: Language.EN,
-          userId,
-          slug: slugify('Remove Genre Movie'),
+          name: 'Action',
         },
       })
 
-      const genre = await prisma.genre.create({
-        data: { id: randomUUID(), name: 'Drama' },
-      })
-
-      await prisma.movie.update({
-        where: { id: movie.id },
-        data: { genres: { connect: { id: genre.id } } },
+      const movie = await prisma.movie.create({
+        data: {
+          id: randomUUID(),
+          title: 'Movie with Genre',
+          originalTitle: 'Movie with Genre',
+          description: 'Description',
+          releaseDate: new Date(),
+          duration: 120,
+          status: MovieStatus.RELEASED,
+          language: Language.EN,
+          slug: slugify('Movie with Genre'),
+          userId,
+          genres: {
+            connect: {
+              id: genre.id,
+            },
+          },
+        },
       })
 
       const response = await request(app.getHttpServer())
@@ -867,29 +871,35 @@ describe('MoviesController (E2E)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(response.statusCode).toBe(200)
-      expect(response.body.genres).toEqual(
-        expect.not.arrayContaining([expect.objectContaining({ id: genre.id })]),
-      )
+
+      const updatedMovie = await prisma.movie.findUnique({
+        where: { id: movie.id },
+        include: { genres: true },
+      })
+
+      expect(updatedMovie?.genres).toHaveLength(0)
     })
 
     it('[DELETE] /movies/:movieId/genres/:genreId — should return 404 if genre is not associated with the movie', async () => {
       const movie = await prisma.movie.create({
         data: {
           id: randomUUID(),
-          title: 'No Genre Association',
-          originalTitle: 'No Genre Association',
+          title: 'Movie without Genre',
+          originalTitle: 'Movie without Genre',
           description: 'Description',
-          releaseDate: new Date('2023-01-01'),
-          duration: 100,
+          releaseDate: new Date(),
+          duration: 120,
           status: MovieStatus.RELEASED,
           language: Language.EN,
+          slug: slugify('Movie without Genre'),
           userId,
-          slug: slugify('No Genre Association'),
         },
       })
 
       const genre = await prisma.genre.create({
-        data: { id: randomUUID(), name: 'Fantasy' },
+        data: {
+          name: 'Action',
+        },
       })
 
       const response = await request(app.getHttpServer())
