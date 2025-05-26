@@ -6,6 +6,7 @@ import { Test } from '@nestjs/testing'
 import bcrypt from 'bcrypt'
 import { randomUUID } from 'node:crypto'
 import request from 'supertest'
+import { ValidationMessages } from './pipes/parse-file-pipe'
 
 describe('File upload (E2E)', () => {
   let app: INestApplication
@@ -68,7 +69,7 @@ describe('File upload (E2E)', () => {
       .send()
 
     expect(response.statusCode).toBe(400)
-    expect(response.body.message).toContain('O arquivo é obrigatório')
+    expect(response.body.message).toContain(ValidationMessages.FILE_REQUIRED)
   })
 
   test('[POST] /upload — should reject if unauthorized', async () => {
@@ -98,7 +99,7 @@ describe('File upload (E2E)', () => {
 
     expect(response.statusCode).toBe(400)
     expect(response.body.message).toContain(
-      'Tipo de arquivo inválido. Envie uma imagem (jpg, jpeg, png ou webp)',
+      ValidationMessages.INVALID_FILE_TYPE,
     )
   })
 
@@ -109,8 +110,6 @@ describe('File upload (E2E)', () => {
       .attach('file', './test/e2e/large-image.jpg')
 
     expect(response.statusCode).toBe(400)
-    expect(response.body.message).toContain(
-      'O arquivo excede o tamanho máximo permitido de 5MB',
-    )
+    expect(response.body.message).toContain(ValidationMessages.FILE_TOO_LARGE)
   })
 })
