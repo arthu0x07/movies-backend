@@ -1,11 +1,13 @@
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
-import { AppModule } from './app.module'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
-import { seedMovies } from 'prisma/seed/movies.seed'
+import { AppModule } from './app.module'
 import { PrismaService } from './database/prisma/prisma.service'
 import { Env } from './env'
+
+import { seedMovies } from 'prisma/seed/movies.seed'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -24,7 +26,23 @@ async function bootstrap() {
     }),
   )
 
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Movies API')
+    .setDescription('API for managing movies, files, genres and users')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'access-token',
+    )
+    .build()
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig)
+  SwaggerModule.setup('docs', app, document)
+
   await app.listen(port)
 }
-
 bootstrap()
