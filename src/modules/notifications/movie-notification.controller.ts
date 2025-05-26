@@ -9,8 +9,16 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger'
 import { MovieNotificationService } from './movie-notification.service'
 
+@ApiTags('movie-notifications')
+@ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('/notifications/movies')
 export class MovieNotificationController {
@@ -19,6 +27,16 @@ export class MovieNotificationController {
   ) {}
 
   @Post('/:movieId')
+  @ApiOperation({ summary: 'Inscrever usuário na notificação de um filme' })
+  @ApiResponse({
+    status: 201,
+    description: 'Inscrição realizada com sucesso.',
+    schema: {
+      example: {
+        message: 'Inscrição na notificação do filme realizada com sucesso.',
+      },
+    },
+  })
   async subscribeToMovieNotification(
     @Param('movieId') movieId: string,
     @CurrentUser() user: UserPayload,
@@ -35,6 +53,11 @@ export class MovieNotificationController {
 
   @Delete('/:movieId')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Cancelar inscrição na notificação de um filme' })
+  @ApiResponse({
+    status: 204,
+    description: 'Inscrição cancelada com sucesso.',
+  })
   async unsubscribeFromMovieNotification(
     @Param('movieId') movieId: string,
     @CurrentUser() user: UserPayload,

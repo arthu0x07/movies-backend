@@ -51,7 +51,7 @@ export class MovieNotificationService {
           await this.emailService.sendMovieAvailableEmail(
             notification.user.email,
             movie.title,
-            `https://host.com/movies/${movie.slug}`,
+            `https://host.com/movies/${movie.slug}`, // adicionar a url do front
           )
           await this.prisma.userMovieNotification.update({
             where: { id: notification.id },

@@ -8,11 +8,13 @@ import {
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { ApiBearerAuth } from '@nestjs/swagger'
 import { ParseFilePipe } from './pipes/parse-file-pipe'
 import { UploadedFile as UploadedFileResponse } from './upload.interface'
 import { FileUploadService } from './upload.service'
 
 @UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth()
 @Controller('/upload')
 export class FileUploadController {
   constructor(private readonly fileUploadService: FileUploadService) {}
