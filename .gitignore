@@ -53,3 +53,28 @@ database/
 #env files
 .env.docker
 .env
+
+# Environment
+.env.*
+!.env.example
+
+# Database
+*.sqlite
+*.sqlite3
+
+# Cache
+.eslintcache
+.cache/
+
+# Build
+build/
+dist/
+out/
+
+# Misc
+.DS_Store
+Thumbs.db
+
+# Application logs
+/logs/*
+!/logs/.gitkeep
