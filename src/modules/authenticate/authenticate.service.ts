@@ -1,13 +1,18 @@
 import { PrismaService } from '@/database/prisma/prisma.service'
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { compare } from 'bcryptjs'
+import { SignInBodyDto } from './dto/sign-in-body.dto'
 
 @Injectable()
 export class AuthenticateService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwt: JwtService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async authenticateUser(
@@ -28,7 +33,35 @@ export class AuthenticateService {
       throw new NotFoundException('User credentials not valid')
     }
 
-    const accessToken = this.jwt.sign({ sub: user.id })
+    const accessToken = this.jwtService.sign({ sub: user.id })
     return { access_token: accessToken }
+  }
+
+  async signIn(body: SignInBodyDto) {
+    const { email, password } = body
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    })
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials.')
+    }
+
+    const isPasswordValid = await compare(password, user.password)
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials.')
+    }
+
+    const token = this.jwtService.sign({ sub: user.id })
+
+    return {
+      data: { token },
+      meta: {
+        timestamp: new Date().toISOString(),
+        path: '/authenticate',
+      },
+    }
   }
 }

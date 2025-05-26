@@ -1,35 +1,22 @@
-import { Body, Controller, Post } from '@nestjs/common'
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common'
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { AuthenticateService } from './authenticate.service'
-import { AuthenticateBodyDto } from './dto/authenticate-body.dto'
+import { SignInBodyDto } from './dto/sign-in-body.dto'
 
-@ApiTags('Authenticate')
-@Controller('/auth')
+@ApiTags('Autenticação')
+@Controller('/authenticate')
 export class AuthenticateController {
-  constructor(private readonly authService: AuthenticateService) {}
+  constructor(private readonly authenticateService: AuthenticateService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Autenticar usuário e gerar token' })
-  @ApiBody({ type: AuthenticateBodyDto })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Realiza login na aplicação' })
+  @ApiBody({ type: SignInBodyDto })
   @ApiResponse({
-    status: 201,
-    description: 'Usuário autenticado com sucesso, token retornado.',
-    schema: {
-      example: {
-        token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-      },
-    },
+    status: HttpStatus.OK,
+    description: 'Login realizado com sucesso',
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Dados inválidos (e-mail ou senha faltando/errados).',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Falha na autenticação (credenciais inválidas).',
-  })
-  async handle(@Body() body: AuthenticateBodyDto) {
-    const { email, password } = body
-    return this.authService.authenticateUser(email, password)
+  async signIn(@Body() body: SignInBodyDto) {
+    return this.authenticateService.signIn(body)
   }
 }
