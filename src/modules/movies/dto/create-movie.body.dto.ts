@@ -1,3 +1,4 @@
+import { ValidationMessages } from '@/errors/validation-messages'
 import { Language, MovieStatus } from '@prisma/client'
 import { Type } from 'class-transformer'
 import {
@@ -13,74 +14,68 @@ import {
 } from 'class-validator'
 
 export class CreateMovieBodyDto {
-  @IsString({ message: 'O título deve ser uma string.' })
-  @IsNotEmpty({ message: 'O título não pode estar vazio.' })
+  @IsString({ message: ValidationMessages.TITLE_STRING })
+  @IsNotEmpty({ message: ValidationMessages.TITLE_REQUIRED })
   title: string
 
-  @IsString({ message: 'O título original deve ser uma string.' })
-  @IsNotEmpty({ message: 'O título original não pode estar vazio.' })
+  @IsString({ message: ValidationMessages.ORIGINAL_TITLE_STRING })
+  @IsNotEmpty({ message: ValidationMessages.ORIGINAL_TITLE_REQUIRED })
   originalTitle: string
 
-  @IsString({ message: 'A descrição deve ser uma string.' })
-  @IsNotEmpty({ message: 'A descrição não pode estar vazia.' })
+  @IsString({ message: ValidationMessages.DESCRIPTION_STRING })
+  @IsNotEmpty({ message: ValidationMessages.DESCRIPTION_REQUIRED })
   description: string
 
-  @IsString({ message: 'O slogan (tagline) deve ser uma string.' })
-  @IsNotEmpty({ message: 'O slogan não pode estar vazio.' })
+  @IsString({ message: ValidationMessages.TAGLINE_STRING })
+  @IsNotEmpty({ message: ValidationMessages.TAGLINE_REQUIRED })
   tagline: string
 
-  @IsDateString(
-    {},
-    { message: 'A data de lançamento deve ser uma data válida.' },
-  )
-  @IsNotEmpty({ message: 'A data de lançamento não pode estar vazia.' })
+  @IsDateString({}, { message: ValidationMessages.RELEASE_DATE_INVALID })
+  @IsNotEmpty({ message: ValidationMessages.RELEASE_DATE_REQUIRED })
   releaseDate: string
 
   @Type(() => Number)
-  @IsNumber({}, { message: 'A duração deve ser um número.' })
-  @Min(0, { message: 'A duração não pode ser negativa.' })
+  @IsNumber({}, { message: ValidationMessages.DURATION_NUMBER })
+  @Min(0, { message: ValidationMessages.DURATION_MIN })
   duration: number
 
-  @IsEnum(MovieStatus, {
-    message:
-      'Status inválido. Valores permitidos: "RELEASED", "UNRELEASED", etc.',
-  })
-  @IsNotEmpty({ message: 'O status não pode estar vazio.' })
+  @IsEnum(MovieStatus, { message: ValidationMessages.STATUS_INVALID })
+  @IsNotEmpty({ message: ValidationMessages.STATUS_REQUIRED })
   status: MovieStatus
 
-  @IsString({ message: 'O idioma deve ser uma string.' })
-  @IsNotEmpty({ message: 'O idioma não pode estar vazio.' })
+  @IsString({ message: ValidationMessages.LANGUAGE_STRING })
+  @IsNotEmpty({ message: ValidationMessages.LANGUAGE_REQUIRED })
   language: Language
 
-  @IsNumber({}, { message: 'O orçamento deve ser um número.' })
-  @IsNotEmpty({ message: 'O orçamento não pode estar vazio.' })
+  @IsNumber({}, { message: ValidationMessages.BUDGET_NUMBER })
+  @IsNotEmpty({ message: ValidationMessages.BUDGET_REQUIRED })
   budget: number
 
-  @IsNumber({}, { message: 'A receita deve ser um número.' })
-  @IsNotEmpty({ message: 'A receita não pode estar vazia.' })
+  @IsNumber({}, { message: ValidationMessages.REVENUE_NUMBER })
+  @IsNotEmpty({ message: ValidationMessages.REVENUE_REQUIRED })
   revenue: number
 
-  @IsNumber({}, { message: 'A popularidade deve ser um número.' })
-  @IsNotEmpty({ message: 'A popularidade não pode estar vazia.' })
+  @IsNumber({}, { message: ValidationMessages.POPULARITY_NUMBER })
+  @IsNotEmpty({ message: ValidationMessages.POPULARITY_REQUIRED })
   popularity: number
 
-  @IsNumber({}, { message: 'O número de votos deve ser um número.' })
-  @IsNotEmpty({ message: 'O número de votos não pode estar vazio.' })
+  @IsNumber({}, { message: ValidationMessages.VOTES_NUMBER })
+  @IsNotEmpty({ message: ValidationMessages.VOTES_REQUIRED })
   votes: number
 
-  @IsNumber({}, { message: 'A porcentagem de avaliação deve ser um número.' })
-  @IsNotEmpty({ message: 'A porcentagem de avaliação não pode estar vazia.' })
+  @IsNumber({}, { message: ValidationMessages.RATING_PERCENTAGE_NUMBER })
+  @IsNotEmpty({ message: ValidationMessages.RATING_PERCENTAGE_REQUIRED })
   ratingPercentage: number
 
-  @IsArray({ message: 'Os gêneros devem ser um array.' })
+  @IsArray({ message: ValidationMessages.GENRES_ARRAY })
   @IsUUID('all', {
     each: true,
-    message: 'Cada gênero deve ser um UUID válido.',
+    message: ValidationMessages.GENRE_UUID,
   })
-  @IsNotEmpty({ message: 'Os gêneros não podem estar vazios.' })
+  @IsNotEmpty({ message: ValidationMessages.GENRES_REQUIRED })
   genresIds: string[]
 
-  @IsUUID(undefined, { message: 'O ID do arquivo deve ser um UUID válido.' })
+  @IsUUID(undefined, { message: ValidationMessages.FILE_UUID })
   @IsOptional()
   fileId: string
 }

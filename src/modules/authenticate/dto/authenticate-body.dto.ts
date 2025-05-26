@@ -1,13 +1,12 @@
+import { ValidationMessages } from '@/errors/validation-messages'
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator'
 
 export class AuthenticateBodyDto {
-  @IsEmail({}, { message: 'O e-mail informado não é válido' })
-  @IsNotEmpty({
-    message: 'O e-mail é obrigatório',
-  })
+  @IsEmail({}, { message: ValidationMessages.INVALID_EMAIL })
+  @IsNotEmpty({ message: ValidationMessages.EMAIL_REQUIRED })
   email: string
 
-  @IsString({ message: 'A senha precisa ser uma string' })
-  @IsNotEmpty({ message: 'A senha é obrigatória' })
+  @IsString({ message: ValidationMessages.PASSWORD_STRING })
+  @IsNotEmpty({ message: ValidationMessages.PASSWORD_REQUIRED })
   password: string
 }

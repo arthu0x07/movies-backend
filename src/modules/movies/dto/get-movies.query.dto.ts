@@ -1,3 +1,4 @@
+import { ValidationMessages } from '@/errors/validation-messages'
 import { Language, MovieStatus } from '@prisma/client'
 import { Type } from 'class-transformer'
 import {
@@ -12,56 +13,39 @@ import {
 
 export class GetMoviesQueryDto {
   @IsOptional()
-  @IsString({ message: 'O título deve ser uma string' })
+  @IsString({ message: ValidationMessages.TITLE_STRING })
   title?: string
 
   @IsOptional()
-  @IsEnum(MovieStatus, {
-    message:
-      'O status deve ser um dos valores: RELEASED, IN_PRODUCTION, PLANNED, CANCELLED',
-  })
+  @IsEnum(MovieStatus, { message: ValidationMessages.STATUS_INVALID })
   status?: MovieStatus
 
   @IsOptional()
-  @IsEnum(Language, {
-    message: 'A linguagem deve ser uma das seguintes: EN, PT, ES, FR, DE, JP',
-  })
+  @IsEnum(Language, { message: ValidationMessages.LANGUAGE_INVALID })
   language?: Language
 
   @IsOptional()
-  @IsArray({ message: 'genreIds deve ser um array de strings' })
-  @IsString({ each: true, message: 'Cada genreId deve ser uma string' })
+  @IsArray({ message: ValidationMessages.GENRE_IDS_ARRAY })
+  @IsString({ each: true, message: ValidationMessages.GENRE_ID_STRING })
   genreIds?: string[]
 
   @IsOptional()
-  @IsDateString(
-    {},
-    {
-      message:
-        'A data releaseDateStart deve ser uma string válida no formato ISO 8601',
-    },
-  )
+  @IsDateString({}, { message: ValidationMessages.RELEASE_DATE_START_INVALID })
   releaseDateStart?: string
 
   @IsOptional()
-  @IsDateString(
-    {},
-    {
-      message:
-        'A data releaseDateEnd deve ser uma string válida no formato ISO 8601',
-    },
-  )
+  @IsDateString({}, { message: ValidationMessages.RELEASE_DATE_END_INVALID })
   releaseDateEnd?: string
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'page deve ser um número inteiro' })
-  @Min(1, { message: 'page deve ser no mínimo 1' })
+  @IsInt({ message: ValidationMessages.PAGE_INTEGER })
+  @Min(1, { message: ValidationMessages.PAGE_MIN })
   page?: number = 1
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt({ message: 'perPage deve ser um número inteiro' })
-  @Min(1, { message: 'perPage deve ser no mínimo 1' })
+  @IsInt({ message: ValidationMessages.PER_PAGE_INTEGER })
+  @Min(1, { message: ValidationMessages.PER_PAGE_MIN })
   perPage?: number = 10
 }

@@ -1,12 +1,12 @@
 import { AppModule } from '@/app.module'
 import { PrismaService } from '@/database/prisma/prisma.service'
+import { ValidationMessages } from '@/errors/validation-messages'
 import { INestApplication } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Test } from '@nestjs/testing'
 import bcrypt from 'bcrypt'
 import { randomUUID } from 'node:crypto'
 import request from 'supertest'
-import { ValidationMessages } from './pipes/parse-file-pipe'
 
 describe('File upload (E2E)', () => {
   let app: INestApplication
