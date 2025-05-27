@@ -1,7 +1,7 @@
 import { ValidationMessages } from '@/errors/validation-messages'
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { Language, MovieStatus } from '@prisma/client'
-import { Type } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 import {
   IsArray,
   IsDateString,
@@ -36,6 +36,17 @@ export class GetMoviesQueryDto {
     description: 'IDs dos gêneros para filtro',
   })
   @IsOptional()
+  @Transform(({ value }) => {
+    // Handle different formats: string, array, or undefined
+    if (!value) return undefined
+    if (Array.isArray(value)) return value
+    if (typeof value === 'string') return [value]
+    // Handle object with numeric keys (from query params like genreIds[0], genreIds[1])
+    if (typeof value === 'object') {
+      return Object.values(value).filter(v => typeof v === 'string')
+    }
+    return undefined
+  })
   @IsArray({ message: ValidationMessages.GENRE_IDS_ARRAY })
   @IsString({ each: true, message: ValidationMessages.GENRE_ID_STRING })
   genreIds?: string[]

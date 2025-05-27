@@ -321,6 +321,22 @@ export class MoviesService {
     }
   }
 
+  async getAllGenres() {
+    const genres = await this.prisma.genre.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    })
+
+    return {
+      data: genres,
+      meta: {
+        timestamp: new Date().toISOString(),
+        path: '/movies/genres',
+      },
+    }
+  }
+
   private async validateUserExists(userId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } })
     if (!user) {

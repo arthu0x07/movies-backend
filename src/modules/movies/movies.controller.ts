@@ -198,6 +198,34 @@ export class MoviesController {
     return this.moviesService.listMoviesByUser(userId, page, perPage)
   }
 
+  @Get('/genres')
+  @ApiOperation({ summary: 'Listar todos os gêneros disponíveis' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de gêneros retornada com sucesso',
+    schema: {
+      example: {
+        data: [
+          {
+            id: 'uuid-genre1',
+            name: 'Ação',
+          },
+          {
+            id: 'uuid-genre2',
+            name: 'Drama',
+          },
+        ],
+        meta: {
+          timestamp: '2024-01-01T00:00:00.000Z',
+          path: '/movies/genres',
+        },
+      },
+    },
+  })
+  async getAllGenres() {
+    return this.moviesService.getAllGenres()
+  }
+
   @Get('/:slug')
   @ApiOperation({ summary: 'Obter filme por slug' })
   @ApiParam({
