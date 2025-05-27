@@ -46,7 +46,6 @@ export class MoviesService {
       },
       include: {
         genres: true,
-        user: true,
         file: true,
       },
     })
@@ -99,7 +98,6 @@ export class MoviesService {
         where,
         include: {
           genres: true,
-          user: true,
           file: true,
         },
         skip,
@@ -130,7 +128,6 @@ export class MoviesService {
         where,
         include: {
           genres: true,
-          user: true,
           file: true,
         },
         skip: (page - 1) * perPage,
@@ -156,7 +153,6 @@ export class MoviesService {
       where: { slug },
       include: {
         genres: true,
-        user: true,
         file: true,
       },
     })
@@ -217,7 +213,6 @@ export class MoviesService {
       },
       include: {
         genres: true,
-        user: true,
         file: true,
       },
     })
@@ -242,7 +237,6 @@ export class MoviesService {
       where: { id: movieId },
       include: {
         genres: true,
-        user: true,
         file: true,
       },
     })
@@ -274,7 +268,6 @@ export class MoviesService {
       },
       include: {
         genres: true,
-        user: true,
         file: true,
       },
     })
@@ -315,7 +308,6 @@ export class MoviesService {
       },
       include: {
         genres: true,
-        user: true,
         file: true,
       },
     })
@@ -366,7 +358,6 @@ export class MoviesService {
       where: { id: movieId },
       include: {
         genres: true,
-        user: true,
         file: true,
       },
     })
