@@ -90,7 +90,7 @@ describe('MoviesController (E2E)', () => {
         votes: 30000,
         ratingPercentage: 91.2,
         genresIds: [genres.id],
-        fileId: file.id,
+        posterFileId: file.id,
       }
 
       const response = await request(app.getHttpServer())
@@ -119,7 +119,7 @@ describe('MoviesController (E2E)', () => {
             id: genres.id,
           }),
         ]),
-        file: expect.objectContaining({
+        posterFile: expect.objectContaining({
           id: file.id,
         }),
       })
@@ -193,7 +193,7 @@ describe('MoviesController (E2E)', () => {
         votes: 30000,
         ratingPercentage: 91.2,
         genresIds: [genres.id],
-        fileId: file.id,
+        posterFileId: file.id,
       }
 
       const response = await request(app.getHttpServer())
@@ -246,7 +246,7 @@ describe('MoviesController (E2E)', () => {
           votes: 30000,
           ratingPercentage: 91.2,
           genresIds: [genres.id],
-          fileId: file.id,
+          posterFileId: file.id,
         })
 
       expect(response.statusCode).toBe(400)
@@ -291,7 +291,7 @@ describe('MoviesController (E2E)', () => {
           votes: 30000,
           ratingPercentage: 91.2,
           genresIds: [genres.id],
-          fileId: file.id,
+          posterFileId: file.id,
         })
 
       expect(response.statusCode).toBe(404)

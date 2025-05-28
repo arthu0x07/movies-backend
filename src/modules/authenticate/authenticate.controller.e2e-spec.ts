@@ -41,6 +41,7 @@ describe('Authenticate (E2E)', () => {
     expect(response.body).toEqual({
       data: {
         token: expect.any(String),
+        userId: expect.any(String),
       },
       meta: {
         timestamp: expect.any(String),

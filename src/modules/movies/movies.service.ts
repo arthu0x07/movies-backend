@@ -55,7 +55,7 @@ export class MoviesService {
             }
           : undefined,
         ...rest,
-        releaseDate: new Date(rest.releaseDate + 'T00:00:00.000Z'),
+        releaseDate: new Date(rest.releaseDate),
       },
       include: {
         genres: true,
@@ -65,7 +65,7 @@ export class MoviesService {
     })
 
     // Check if release date is in the future and create notification
-    const releaseDate = new Date(rest.releaseDate + 'T00:00:00.000Z') // Force UTC Date Format
+    const releaseDate = new Date(rest.releaseDate) // Parse the date as provided
     const today = new Date()
     const todayUTC = new Date(today.getFullYear(), today.getMonth(), today.getDate())
 
