@@ -3,6 +3,7 @@ import { UserPayload } from '@/auth/jwt-strategy'
 import {
   Controller,
   Delete,
+  Get,
   HttpCode,
   Param,
   Post,
@@ -67,5 +68,28 @@ export class MovieNotificationController {
       userId,
       movieId,
     )
+  }
+
+  @Get('/:movieId/status')
+  @ApiOperation({ summary: 'Verificar se usuário está inscrito na notificação de um filme' })
+  @ApiResponse({
+    status: 200,
+    description: 'Status da inscrição.',
+    schema: {
+      example: {
+        isSubscribed: true,
+      },
+    },
+  })
+  async getNotificationStatus(
+    @Param('movieId') movieId: string,
+    @CurrentUser() user: UserPayload,
+  ) {
+    const userId = user.sub
+    const isSubscribed = await this.movieNotificationService.isUserSubscribedToMovieNotification(
+      userId,
+      movieId,
+    )
+    return { isSubscribed }
   }
 }

@@ -3,19 +3,30 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common'
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston'
+import { Logger as WinstonLogger } from 'winston'
 
 import { slugify } from '@/utils/slugify.util'
 import { Prisma } from '@prisma/client'
 import { CreateMovieBodyDto } from './dto/create-movie.body.dto'
 import { GetMoviesQueryDto } from './dto/get-movies.query.dto'
 import { UpdateMovieBodyDto } from './dto/update-movie.body.dto'
+import { MovieNotificationService } from '../notifications/movie-notification.service'
 
 @Injectable()
 export class MoviesService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(MoviesService.name)
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly movieNotificationService: MovieNotificationService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly winstonLogger: WinstonLogger,
+  ) {}
 
   async createMovie(params: CreateMovieBodyDto, userId: string) {
     const { title, genresIds, posterFileId, bannerFileId, ...rest } = params
@@ -44,7 +55,7 @@ export class MoviesService {
             }
           : undefined,
         ...rest,
-        releaseDate: new Date(rest.releaseDate),
+        releaseDate: new Date(rest.releaseDate + 'T00:00:00.000Z'),
       },
       include: {
         genres: true,
@@ -52,6 +63,65 @@ export class MoviesService {
         bannerFile: true,
       },
     })
+
+    // Check if release date is in the future and create notification
+    const releaseDate = new Date(rest.releaseDate + 'T00:00:00.000Z') // Force UTC Date Format
+    const today = new Date()
+    const todayUTC = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+
+    this.winstonLogger.info('Movie created successfully', {
+      service: 'MoviesService',
+      action: 'createMovie',
+      movieId: movie.id,
+      movieTitle: movie.title,
+      userId,
+      releaseDate: releaseDate.toISOString().split('T')[0],
+      currentDate: todayUTC.toISOString().split('T')[0],
+    })
+
+    if (releaseDate > todayUTC) {
+      this.winstonLogger.info('Movie has future release date, creating automatic notification', {
+        service: 'MoviesService',
+        action: 'createMovie',
+        movieId: movie.id,
+        movieTitle: movie.title,
+        userId,
+        releaseDate: releaseDate.toISOString().split('T')[0],
+      })
+      try {
+        await this.movieNotificationService.createNotificationForFutureMovie(
+          userId,
+          movie.id,
+        )
+        this.winstonLogger.info('Automatic notification created successfully', {
+          service: 'MoviesService',
+          action: 'createMovie',
+          movieId: movie.id,
+          movieTitle: movie.title,
+          userId,
+        })
+      } catch (error) {
+        // Log error but don't fail movie creation
+        this.winstonLogger.error('Failed to create automatic notification', {
+          service: 'MoviesService',
+          action: 'createMovie',
+          movieId: movie.id,
+          movieTitle: movie.title,
+          userId,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        })
+      }
+    } else {
+      this.winstonLogger.debug('Movie does not have future release date, no notification created', {
+        service: 'MoviesService',
+        action: 'createMovie',
+        movieId: movie.id,
+        movieTitle: movie.title,
+        userId,
+        releaseDate: releaseDate.toISOString().split('T')[0],
+      })
+    }
 
     return {
       data: movie,
@@ -215,7 +285,7 @@ export class MoviesService {
       where: { id: movieId },
       data: {
         ...rest,
-        ...(releaseDate && { releaseDate: new Date(releaseDate) }),
+        ...(releaseDate && { releaseDate: new Date(releaseDate + 'T00:00:00.000Z') }), // Force UTC
         genres: genresIds?.length
           ? {
               set: genresIds.map((id) => ({ id })),
