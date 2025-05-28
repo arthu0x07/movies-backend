@@ -57,7 +57,10 @@ export class AuthenticateService {
     const token = this.jwtService.sign({ sub: user.id })
 
     return {
-      data: { token },
+      data: { 
+        token,
+        userId: user.id 
+      },
       meta: {
         timestamp: new Date().toISOString(),
         path: '/authenticate',

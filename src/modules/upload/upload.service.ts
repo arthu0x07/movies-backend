@@ -33,7 +33,7 @@ export class FileUploadService {
     fileType,
     body,
   }: UploadFileRequest): Promise<UploadedFile> {
-    if (!/^(image\/(jpeg|png))$|^application\/pdf$/.test(fileType)) {
+    if (!/^image\/(jpeg|png|webp)$/.test(fileType)) {
       throw new InvalidFileTypeError(fileType)
     }
 

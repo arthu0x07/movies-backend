@@ -58,8 +58,11 @@ model Movie {
   votes            Int?
   ratingPercentage Float?
 
-  fileId String? @unique
-  file   File?   @relation(fields: [fileId], references: [id])
+  posterFileId String? @map("poster_file_id")
+  posterFile   File?   @relation("MoviePoster", fields: [posterFileId], references: [id])
+
+  bannerFileId String? @map("banner_file_id")
+  bannerFile   File?   @relation("MovieBanner", fields: [bannerFileId], references: [id])
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
@@ -100,7 +103,8 @@ model File {
   title String
   url   String
 
-  Movie Movie?
+  MoviePoster Movie[] @relation("MoviePoster")
+  MovieBanner Movie[] @relation("MovieBanner")
 
   @@map("files")
 }

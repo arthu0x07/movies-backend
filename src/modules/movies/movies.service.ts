@@ -18,11 +18,12 @@ export class MoviesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createMovie(params: CreateMovieBodyDto, userId: string) {
-    const { title, genresIds, fileId, ...rest } = params
+    const { title, genresIds, posterFileId, bannerFileId, ...rest } = params
 
     await this.validateUserExists(userId)
     await this.validateGenresExist(genresIds)
-    await this.validateFileExists(fileId)
+    await this.validateFileExists(posterFileId)
+    await this.validateFileExists(bannerFileId)
 
     const slug = slugify(title)
     const existing = await this.prisma.movie.findUnique({ where: { slug } })
@@ -35,7 +36,8 @@ export class MoviesService {
         title,
         slug,
         userId,
-        fileId,
+        posterFileId,
+        bannerFileId,
         genres: genresIds?.length
           ? {
               connect: genresIds.map((id) => ({ id })),
@@ -46,7 +48,8 @@ export class MoviesService {
       },
       include: {
         genres: true,
-        file: true,
+        posterFile: true,
+        bannerFile: true,
       },
     })
 
@@ -98,7 +101,8 @@ export class MoviesService {
         where,
         include: {
           genres: true,
-          file: true,
+          posterFile: true,
+          bannerFile: true,
         },
         skip,
         take,
@@ -128,7 +132,8 @@ export class MoviesService {
         where,
         include: {
           genres: true,
-          file: true,
+          posterFile: true,
+          bannerFile: true,
         },
         skip: (page - 1) * perPage,
         take: perPage,
@@ -153,7 +158,8 @@ export class MoviesService {
       where: { slug },
       include: {
         genres: true,
-        file: true,
+        posterFile: true,
+        bannerFile: true,
       },
     })
 
@@ -180,15 +186,19 @@ export class MoviesService {
     const movie = await this.validateMovieExists(movieId)
 
     if (movie.userId !== userId) {
-      throw new ForbiddenException('You are not allowed to delete this movie.')
+      throw new ForbiddenException('You are not allowed to update this movie.')
     }
 
     if (params.genresIds) {
       await this.validateGenresExist(params.genresIds)
     }
 
-    if (params.fileId) {
-      await this.validateFileExists(params.fileId)
+    if (params.posterFileId) {
+      await this.validateFileExists(params.posterFileId)
+    }
+
+    if (params.bannerFileId) {
+      await this.validateFileExists(params.bannerFileId)
     }
 
     if (params.duration !== undefined && params.duration < 0) {
@@ -199,12 +209,13 @@ export class MoviesService {
       throw new BadRequestException('Updating slug is not allowed.')
     }
 
-    const { genresIds, ...rest } = params
+    const { genresIds, releaseDate, ...rest } = params
 
     const updatedMovie = await this.prisma.movie.update({
       where: { id: movieId },
       data: {
         ...rest,
+        ...(releaseDate && { releaseDate: new Date(releaseDate) }),
         genres: genresIds?.length
           ? {
               set: genresIds.map((id) => ({ id })),
@@ -213,7 +224,8 @@ export class MoviesService {
       },
       include: {
         genres: true,
-        file: true,
+        posterFile: true,
+        bannerFile: true,
       },
     })
 
@@ -237,7 +249,8 @@ export class MoviesService {
       where: { id: movieId },
       include: {
         genres: true,
-        file: true,
+        posterFile: true,
+        bannerFile: true,
       },
     })
 
@@ -268,7 +281,8 @@ export class MoviesService {
       },
       include: {
         genres: true,
-        file: true,
+        posterFile: true,
+        bannerFile: true,
       },
     })
 
@@ -308,7 +322,8 @@ export class MoviesService {
       },
       include: {
         genres: true,
-        file: true,
+        posterFile: true,
+        bannerFile: true,
       },
     })
 
@@ -374,7 +389,8 @@ export class MoviesService {
       where: { id: movieId },
       include: {
         genres: true,
-        file: true,
+        posterFile: true,
+        bannerFile: true,
       },
     })
 

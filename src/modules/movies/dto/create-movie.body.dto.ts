@@ -164,11 +164,21 @@ export class CreateMovieBodyDto {
 
   @ApiProperty({
     example: '550e8400-e29b-41d4-a716-446655440010',
-    description: 'UUID do arquivo de poster/imagem do filme (opcional)',
+    description: 'UUID do arquivo de poster do filme (opcional)',
     required: false,
     format: 'uuid',
   })
   @IsUUID(undefined, { message: ValidationMessages.FILE_UUID })
   @IsOptional()
-  fileId?: string
+  posterFileId?: string
+
+  @ApiProperty({
+    example: '550e8400-e29b-41d4-a716-446655440011',
+    description: 'UUID do arquivo de banner do filme (opcional)',
+    required: false,
+    format: 'uuid',
+  })
+  @IsUUID(undefined, { message: ValidationMessages.FILE_UUID })
+  @IsOptional()
+  bannerFileId?: string
 }
