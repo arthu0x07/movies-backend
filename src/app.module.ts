@@ -4,7 +4,6 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
 import { ThrottlerModule } from '@nestjs/throttler'
 import { WinstonModule } from 'nest-winston'
 
-import { PrismaModule } from '@/database/prisma/prisma.module'
 import { AuthModule } from './auth/auth.module'
 import { envSchema } from './env'
 import { AuthenticateModule } from './modules/authenticate/authenticate.module'
@@ -19,6 +18,7 @@ import { CustomThrottlerGuard } from './common/guards/throttler.guard'
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor'
 import { TransformInterceptor } from './common/interceptors/transform.interceptor'
 import loggerConfig from './config/logger.config'
+import { PrismaModule } from './database/prisma/prisma.module'
 
 @Module({
   imports: [
